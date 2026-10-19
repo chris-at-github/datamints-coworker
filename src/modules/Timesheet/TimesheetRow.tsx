@@ -1,7 +1,7 @@
-import type { MouseEvent } from "react";
+import { type MouseEvent, useState } from "react";
 import { mergeClassName } from "@/lib/class-names";
 import { maskTime } from "@/lib/time";
-import { isEntryEmpty, type TimesheetEntry, type TimesheetField } from "./entries";
+import { getBookingTextField, isEntryEmpty, type TimesheetEntry, type TimesheetField } from "./entries";
 import { TimesheetRowActions } from "./TimesheetRowActions";
 import styles from "./TimesheetRow.module.css";
 
@@ -17,6 +17,10 @@ export type TimesheetRowProps = {
 };
 
 export function TimesheetRow({ entry, rowNumber, editHref, onChange, onBlur, onDelete, onEdit }: TimesheetRowProps) {
+  // Locked on focus, so clearing a reviewed text does not switch to the original while typing.
+  const [editedBookingTextField, setEditedBookingTextField] = useState<TimesheetField | null>(null);
+  const bookingTextField = editedBookingTextField ?? getBookingTextField(entry);
+
   // The mask keeps time fields in "HH:MM" while typing.
   function handleTimeChange(field: TimesheetField, value: string) {
     onChange(field, maskTime(value));
@@ -67,9 +71,13 @@ export function TimesheetRow({ entry, rowNumber, editHref, onChange, onBlur, onD
         <textarea
           className={multilineClassName}
           rows={1}
-          value={entry.bookingText}
-          onChange={(event) => onChange("bookingText", event.target.value)}
-          onBlur={() => onBlur("bookingText")}
+          value={entry[bookingTextField]}
+          onFocus={() => setEditedBookingTextField(getBookingTextField(entry))}
+          onChange={(event) => onChange(bookingTextField, event.target.value)}
+          onBlur={() => {
+            onBlur(bookingTextField);
+            setEditedBookingTextField(null);
+          }}
           aria-label={`Booking text, row ${rowNumber}`}
         />
       </td>

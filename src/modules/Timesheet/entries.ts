@@ -81,6 +81,12 @@ export function isEntryEmpty(entry: TimesheetEntry): boolean {
   return TIMESHEET_FIELDS.every((field) => entry[field] === "" || (field === "duration" && entry[field] === "00:00"));
 }
 
+// The booking text that counts, e.g. for the table and the export: the reviewed
+// text, or the original as long as there is none.
+export function getBookingTextField(entry: TimesheetValues): "bookingText" | "bookingTextReviewed" {
+  return entry.bookingTextReviewed === "" ? "bookingText" : "bookingTextReviewed";
+}
+
 // Start and end time drive the duration; an edited duration moves the end time.
 export function updateEntry(entry: TimesheetEntry, field: TimesheetField, value: string): TimesheetEntry {
   const nextEntry = { ...entry, [field]: value };
