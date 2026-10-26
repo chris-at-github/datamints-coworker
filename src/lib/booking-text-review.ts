@@ -3,11 +3,19 @@ import path from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
+import { parseTime } from "@/lib/time";
 import { findEntryWithDate, saveReviewedBookingText } from "@/lib/timesheet-repository";
 import type { TimesheetEntry } from "@/modules/Timesheet/entries";
 
 // Read on every review, so changed rules apply without a restart.
 const TEMPLATE_PATH = path.join(process.cwd(), "prompts", "booking-text-review.md");
+
+// One instruction block per booking size, inserted at {{durationGuidance}}.
+const GUIDANCE_DIRECTORY = path.join(process.cwd(), "prompts", "booking-text-review");
+
+// Upper limits in minutes, both inclusive; longer bookings are large.
+const SMALL_MAX_MINUTES = 30;
+const MEDIUM_MAX_MINUTES = 120;
 
 const EFFORTS = ["low", "medium", "high", "xhigh", "max"] as const;
 
@@ -19,6 +27,14 @@ const ReviewAnswer = z.object({ optimizedText: z.string() });
 // Replaces {{name}} with the value; unknown placeholders are removed.
 function fillTemplate(template: string, values: Record<string, string>): string {
   return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, name: string) => (Object.hasOwn(values, name) ? values[name] : ""));
+}
+
+function getBookingSize(minutes: number): "small" | "medium" | "large" {
+  if (minutes <= SMALL_MAX_MINUTES) {
+    return "small";
+  }
+
+  return minutes <= MEDIUM_MAX_MINUTES ? "medium" : "large";
 }
 
 function readConfig() {
@@ -48,16 +64,23 @@ export async function reviewBookingText(entryId: string): Promise<TimesheetEntry
 
   const { model, effort } = readConfig();
   const { entry, date } = result;
-  const template = await readFile(TEMPLATE_PATH, "utf8");
-  const prompt = fillTemplate(template, {
+  // Whole minutes cannot be misread as a time of day; an empty duration counts as 0.
+  const minutes = parseTime(entry.duration) ?? 0;
+  const [template, guidance] = await Promise.all([
+    readFile(TEMPLATE_PATH, "utf8"),
+    readFile(path.join(GUIDANCE_DIRECTORY, `${getBookingSize(minutes)}.md`), "utf8"),
+  ]);
+  const values = {
     date,
     startTime: entry.startTime,
     endTime: entry.endTime,
-    duration: entry.duration,
+    duration: `${minutes} min`,
     ticket: entry.ticket,
     bookingText: entry.bookingText,
     bookingTextInternal: entry.bookingTextInternal,
-  });
+  };
+  // The block is filled first, so its placeholders are resolved before it is inserted.
+  const prompt = fillTemplate(template, { ...values, durationGuidance: fillTemplate(guidance, values) });
 
   const response = await new Anthropic().messages.parse({
     model,
