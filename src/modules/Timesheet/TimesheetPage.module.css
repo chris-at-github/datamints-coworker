@@ -3,3 +3,15 @@
   flex-direction: column;
   gap: var(--spacing-50);
 }
+
+/* Buttons below the table and the result of the last transfer. */
+.timesheet-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-30);
+}
+
+.timesheet-page__message {
+  margin: 0;
+}

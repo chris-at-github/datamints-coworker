@@ -1,4 +1,5 @@
 import type { MouseEvent } from "react";
+import { Checkbox } from "@/components/Checkbox/Checkbox";
 import { mergeClassName } from "@/lib/class-names";
 import type { Ticket, TimesheetEntry, TimesheetField } from "./entries";
 import { TimesheetRow } from "./TimesheetRow";
@@ -6,7 +7,11 @@ import styles from "./TimesheetTable.module.css";
 
 export type TimesheetTableProps = {
   pageId: string;
+  // Date of the page, for the transfer status.
+  date: string;
   entries: TimesheetEntry[];
+  selectedIds: ReadonlySet<string>;
+  onSelectionChange: (selectedIds: Set<string>) => void;
   onChange: (index: number, field: TimesheetField, value: string) => void;
   onBlur: (index: number, field: TimesheetField) => void;
   onTicketSave: (index: number, ticket: Ticket | null) => void;
@@ -17,7 +22,10 @@ export type TimesheetTableProps = {
 
 export function TimesheetTable({
   pageId,
+  date,
   entries,
+  selectedIds,
+  onSelectionChange,
   onChange,
   onBlur,
   onTicketSave,
@@ -25,11 +33,32 @@ export function TimesheetTable({
   onEdit,
 }: TimesheetTableProps) {
   const narrowHeadClassName = mergeClassName(styles["timesheet-table__head"], styles["timesheet-table__head--narrow"]);
+  const selectedCount = entries.filter((entry) => selectedIds.has(entry.id)).length;
+
+  function handleSelectedChange(entryId: string, isSelected: boolean) {
+    const nextIds = new Set(selectedIds);
+
+    if (isSelected) {
+      nextIds.add(entryId);
+    } else {
+      nextIds.delete(entryId);
+    }
+
+    onSelectionChange(nextIds);
+  }
 
   return (
     <table className={styles["timesheet-table"]}>
       <thead>
         <tr>
+          <th scope="col" className={narrowHeadClassName}>
+            <Checkbox
+              checked={entries.length > 0 && selectedCount === entries.length}
+              indeterminate={selectedCount > 0 && selectedCount < entries.length}
+              onCheckedChange={(isChecked) => onSelectionChange(new Set(isChecked ? entries.map((entry) => entry.id) : []))}
+              aria-label="Select all rows"
+            />
+          </th>
           <th scope="col" className={narrowHeadClassName}>
             Start
           </th>
@@ -45,6 +74,9 @@ export function TimesheetTable({
           <th scope="col" className={styles["timesheet-table__head"]}>
             Booking text
           </th>
+          <th scope="col" className={narrowHeadClassName}>
+            Odoo
+          </th>
           {/* Row actions; intentionally without a heading. */}
           <th scope="col" className={narrowHeadClassName} />
         </tr>
@@ -55,6 +87,9 @@ export function TimesheetTable({
             key={entry.id}
             entry={entry}
             rowNumber={index + 1}
+            date={date}
+            isSelected={selectedIds.has(entry.id)}
+            onSelectedChange={(isSelected) => handleSelectedChange(entry.id, isSelected)}
             editHref={`/timesheet/${pageId}/entries/${entry.id}`}
             onChange={(field, value) => onChange(index, field, value)}
             onBlur={(field) => onBlur(index, field)}

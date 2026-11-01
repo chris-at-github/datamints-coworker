@@ -1,0 +1,21 @@
+.transfer-status-icon {
+  display: inline-flex;
+  color: var(--font-color-muted);
+
+  &:focus-visible {
+    outline: 2px solid var(--color-outline);
+    outline-offset: 2px;
+  }
+
+  &[data-status="transferred"] {
+    color: oklch(55% 0.15 145deg);
+  }
+
+  &[data-status="changed"] {
+    color: oklch(65% 0.15 70deg);
+  }
+
+  &[data-status="error"] {
+    color: oklch(50% 0.2 25deg);
+  }
+}

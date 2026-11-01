@@ -1,13 +1,18 @@
-import { addDuration, completeTime, getDuration, roundTime } from "@/lib/time";
+import { addDuration, completeTime, getDuration, parseTime, roundTime } from "@/lib/time";
 
 // Odoo models: "helpdesk" is helpdesk.ticket, "project" is project.task.
 export const TICKET_TYPES = ["helpdesk", "project"] as const;
 
 export type TicketType = (typeof TICKET_TYPES)[number];
 
+// A ticket as stored after an Odoo lookup.
 export type Ticket = {
   id: string;
   type: TicketType;
+  // Odoo record id, used in links; the number shown in Odoo can differ.
+  odooId: number;
+  number: string;
+  title: string;
 };
 
 // The editable values of one row.
@@ -15,10 +20,8 @@ export type TimesheetValues = {
   startTime: string;
   endTime: string;
   duration: string;
-  // Odoo record id, which can differ from the ticket number shown in Odoo.
+  // Id of the stored Ticket; "" means the entry has no ticket.
   ticketId: string;
-  // A TicketType; anything else, e.g. "", means the entry has no ticket.
-  ticketType: string;
   bookingText: string;
   bookingTextInternal: string;
   // Rewritten booking text, e.g. by the review; the original stays in bookingText.
@@ -32,7 +35,6 @@ export const TIMESHEET_FIELDS: TimesheetField[] = [
   "endTime",
   "duration",
   "ticketId",
-  "ticketType",
   "bookingText",
   "bookingTextInternal",
   "bookingTextReviewed",
@@ -44,6 +46,23 @@ const TIME_FIELDS: TimesheetField[] = ["startTime", "endTime", "duration"];
 export type TimesheetEntry = TimesheetValues & {
   id: string;
   sorting: number;
+  // The ticket of ticketId for display; it is not saved with the entry.
+  ticket: Ticket | null;
+  // Written by the transfer to Odoo only, see getTransferStatus.
+  odooTimesheetId: number | null;
+  transferredValues: string;
+  transferError: string;
+};
+
+// not transferred, transferred, changed since the transfer, last transfer failed.
+export type TransferStatus = "none" | "transferred" | "changed" | "error";
+
+export type TransferResult = {
+  id: string;
+  // "skipped": not transferable, nothing stored; "failed": the error is stored on the entry.
+  outcome: "transferred" | "skipped" | "failed";
+  message: string;
+  entry: TimesheetEntry | null;
 };
 
 // A page as delivered by the API: one day with its entries in row order.
@@ -71,7 +90,6 @@ const EMPTY_VALUES: TimesheetValues = {
   endTime: "",
   duration: "",
   ticketId: "",
-  ticketType: "",
   bookingText: "",
   bookingTextInternal: "",
   bookingTextReviewed: "",
@@ -81,6 +99,10 @@ const EMPTY_VALUES: TimesheetValues = {
 export function createEmptyEntries(count: number, firstSorting: number): TimesheetEntry[] {
   return Array.from({ length: count }, (_, index) => ({
     ...EMPTY_VALUES,
+    ticket: null,
+    odooTimesheetId: null,
+    transferredValues: "",
+    transferError: "",
     id: crypto.randomUUID(),
     sorting: firstSorting + index,
   }));
@@ -106,14 +128,59 @@ export function isTicketType(value: unknown): value is TicketType {
   return TICKET_TYPES.includes(value as TicketType);
 }
 
-// An entry has a ticket only with an id and a known type.
-export function getTicket(entry: TimesheetValues): Ticket | null {
-  return entry.ticketId !== "" && isTicketType(entry.ticketType) ? { id: entry.ticketId, type: entry.ticketType } : null;
+// The values that go to Odoo; a stored copy tells whether the entry changed since.
+export function getTransferValues(entry: TimesheetValues, date: string): string {
+  return JSON.stringify({
+    date,
+    duration: entry.duration,
+    ticketId: entry.ticketId,
+    text: entry[getBookingTextField(entry)],
+    internalNote: entry.bookingTextInternal,
+  });
 }
 
-// Sets or clears the ticket; both fields change together, so one save stores them.
-export function setTicket<T extends TimesheetValues>(entry: T, ticket: Ticket | null): T {
-  return { ...entry, ticketId: ticket?.id ?? "", ticketType: ticket?.type ?? "" };
+// Why an entry cannot be transferred, or null if it can.
+export function getTransferBlocker(entry: TimesheetValues): string | null {
+  if (entry.ticketId === "") {
+    return "No ticket";
+  }
+
+  if (!parseTime(entry.duration)) {
+    return "No duration";
+  }
+
+  return entry[getBookingTextField(entry)].trim() === "" ? "No booking text" : null;
+}
+
+// A failed transfer wins, so the message stays visible until a transfer works.
+export function getTransferStatus(entry: TimesheetEntry, date: string): TransferStatus {
+  if (entry.transferError !== "") {
+    return "error";
+  }
+
+  if (entry.odooTimesheetId === null) {
+    return "none";
+  }
+
+  return entry.transferredValues === getTransferValues(entry, date) ? "transferred" : "changed";
+}
+
+// Takes over only the transfer fields of the server's entry, so edits made in
+// the meantime stay; without a server entry nothing changes.
+export function applyTransferFields(entry: TimesheetEntry, transferred: TimesheetEntry | null): TimesheetEntry {
+  return transferred
+    ? {
+        ...entry,
+        odooTimesheetId: transferred.odooTimesheetId,
+        transferredValues: transferred.transferredValues,
+        transferError: transferred.transferError,
+      }
+    : entry;
+}
+
+// Sets or clears the ticket; the id is saved, the ticket is kept for display.
+export function setTicket(entry: TimesheetEntry, ticket: Ticket | null): TimesheetEntry {
+  return { ...entry, ticketId: ticket?.id ?? "", ticket };
 }
 
 // Start and end time drive the duration; an edited duration moves the end time.

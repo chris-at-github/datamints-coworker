@@ -1,6 +1,8 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import type {
+  Ticket,
+  TicketType,
   TimesheetEntry,
   TimesheetNeighbors,
   TimesheetPageData,
@@ -11,17 +13,37 @@ import type {
 // Highest date first; pages on the same day are told apart by creation time.
 const LATEST_FIRST: Prisma.TimesheetPageOrderByWithRelationInput[] = [{ date: "desc" }, { createdAt: "desc" }];
 
-// Shapes database rows like the API response: entries in row order, without pageId.
+export const TICKET_SELECT = { id: true, type: true, odooId: true, number: true, title: true } as const;
+
+// An entry without pageId and with its ticket; toEntry shapes it for the API.
+const ENTRY_QUERY = {
+  omit: { pageId: true },
+  include: { ticket: { select: TICKET_SELECT } },
+} as const;
+
+type EntryRow = Prisma.TimesheetEntryGetPayload<typeof ENTRY_QUERY>;
+
+// Takes only the display fields, so rows with more fields can be passed in.
+// Only the application writes the type, so it is always a TicketType.
+export function toTicket({ id, type, odooId, number, title }: Prisma.TicketGetPayload<{ select: typeof TICKET_SELECT }>): Ticket {
+  return { id, type: type as TicketType, odooId, number, title };
+}
+
+// The API uses "" for "no ticket", the database null (a reference must exist).
+function toEntry({ ticketId, ticket, ...values }: EntryRow): TimesheetEntry {
+  return { ...values, ticketId: ticketId ?? "", ticket: ticket && toTicket(ticket) };
+}
+
+// Shapes database rows like the API response: entries in row order.
 // createdAt is only needed to find the neighbours and is removed afterwards.
 const PAGE_SELECT = {
   id: true,
   date: true,
   createdAt: true,
-  entries: {
-    orderBy: { sorting: "asc" },
-    omit: { pageId: true },
-  },
+  entries: { orderBy: { sorting: "asc" }, ...ENTRY_QUERY },
 } as const;
+
+type PageRow = Prisma.TimesheetPageGetPayload<{ select: typeof PAGE_SELECT }>;
 
 export async function findLatestPage(): Promise<TimesheetPageResult | null> {
   const page = await prisma.timesheetPage.findFirst({ orderBy: LATEST_FIRST, select: PAGE_SELECT });
@@ -40,10 +62,8 @@ export async function pageExists(id: string): Promise<boolean> {
 }
 
 // Adds what the header needs besides the page: the neighbours and the latest date.
-async function withNavigation({
-  createdAt,
-  ...page
-}: TimesheetPageData & { createdAt: Date }): Promise<TimesheetPageResult> {
+async function withNavigation({ createdAt, entries, ...pageValues }: PageRow): Promise<TimesheetPageResult> {
+  const page: TimesheetPageData = { ...pageValues, entries: entries.map(toEntry) };
   const [neighbors, latest] = await Promise.all([
     findNeighbors(page.date, createdAt),
     prisma.timesheetPage.findFirst({ orderBy: LATEST_FIRST, select: { date: true } }),
@@ -96,8 +116,8 @@ export type TimesheetEntryResult = {
 export async function findEntry(pageId: string, id: string): Promise<TimesheetEntryResult | null> {
   const entry = await prisma.timesheetEntry.findFirst({
     where: { id, pageId },
-    omit: { pageId: true },
-    include: { page: { select: { date: true } } },
+    ...ENTRY_QUERY,
+    include: { ...ENTRY_QUERY.include, page: { select: { date: true } } },
   });
 
   if (!entry) {
@@ -121,7 +141,7 @@ export async function findEntry(pageId: string, id: string): Promise<TimesheetEn
   ]);
 
   return {
-    entry: values,
+    entry: toEntry(values),
     date: page.date,
     rowNumber: rowsBefore + 1,
     entryCount,
@@ -137,6 +157,7 @@ export type EntryInput = {
 };
 
 // Creates or updates an entry; returns null if its page does not exist.
+// An unknown ticketId fails like any other database error.
 export async function saveEntry(id: string, { pageId, sorting, values }: EntryInput): Promise<TimesheetEntry | null> {
   const page = await prisma.timesheetPage.findUnique({ where: { id: pageId }, select: { id: true } });
 
@@ -144,12 +165,17 @@ export async function saveEntry(id: string, { pageId, sorting, values }: EntryIn
     return null;
   }
 
-  return prisma.timesheetEntry.upsert({
-    where: { id },
-    create: { id, pageId, sorting, ...values },
-    update: { sorting, ...values },
-    omit: { pageId: true },
-  });
+  const { ticketId, ...otherValues } = values;
+  const data = ticketId === undefined ? otherValues : { ...otherValues, ticketId: ticketId || null };
+
+  return toEntry(
+    await prisma.timesheetEntry.upsert({
+      where: { id },
+      create: { id, pageId, sorting, ...data },
+      update: { sorting, ...data },
+      ...ENTRY_QUERY,
+    }),
+  );
 }
 
 // Deleting a missing entry is not an error, so repeated deletes are harmless.
@@ -161,8 +187,8 @@ export async function deleteEntry(id: string): Promise<void> {
 export async function findEntryWithDate(id: string): Promise<{ entry: TimesheetEntry; date: string } | null> {
   const entry = await prisma.timesheetEntry.findUnique({
     where: { id },
-    omit: { pageId: true },
-    include: { page: { select: { date: true } } },
+    ...ENTRY_QUERY,
+    include: { ...ENTRY_QUERY.include, page: { select: { date: true } } },
   });
 
   if (!entry) {
@@ -171,13 +197,49 @@ export async function findEntryWithDate(id: string): Promise<{ entry: TimesheetE
 
   const { page, ...values } = entry;
 
-  return { entry: values, date: page.date };
+  return { entry: toEntry(values), date: page.date };
 }
 
-export function saveReviewedBookingText(id: string, bookingTextReviewed: string): Promise<TimesheetEntry> {
-  return prisma.timesheetEntry.update({
+// The entry with what a transfer needs: the page date and the ticket's Odoo data.
+export async function findEntryForTransfer(id: string) {
+  const entry = await prisma.timesheetEntry.findUnique({
     where: { id },
-    data: { bookingTextReviewed },
-    omit: { pageId: true },
+    ...ENTRY_QUERY,
+    include: {
+      page: { select: { date: true } },
+      ticket: { select: { ...TICKET_SELECT, projectOdooId: true, allowsTimesheets: true } },
+    },
   });
+
+  if (!entry) {
+    return null;
+  }
+
+  const { page, ticket, ...values } = entry;
+
+  return { entry: toEntry({ ...values, ticket }), date: page.date, ticket };
+}
+
+export type TransferUpdate = {
+  odooTimesheetId?: number;
+  transferredValues?: string;
+  transferError: string;
+};
+
+export async function saveTransfer(id: string, data: TransferUpdate): Promise<TimesheetEntry> {
+  return toEntry(await prisma.timesheetEntry.update({ where: { id }, data, ...ENTRY_QUERY }));
+}
+
+// The next transfer creates a new line; the old line in Odoo is not touched.
+export async function unlinkTransfer(id: string): Promise<TimesheetEntry | null> {
+  const { count } = await prisma.timesheetEntry.updateMany({
+    where: { id },
+    data: { odooTimesheetId: null, transferredValues: "", transferError: "" },
+  });
+
+  return count > 0 ? toEntry(await prisma.timesheetEntry.findUniqueOrThrow({ where: { id }, ...ENTRY_QUERY })) : null;
+}
+
+export async function saveReviewedBookingText(id: string, bookingTextReviewed: string): Promise<TimesheetEntry> {
+  return toEntry(await prisma.timesheetEntry.update({ where: { id }, data: { bookingTextReviewed }, ...ENTRY_QUERY }));
 }

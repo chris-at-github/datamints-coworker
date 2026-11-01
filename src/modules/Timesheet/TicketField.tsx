@@ -7,6 +7,7 @@ import { Dialog } from "@/components/Dialog";
 import { Field } from "@/components/Field";
 import { ToggleGroup } from "@/components/ToggleGroup";
 import { mergeClassName } from "@/lib/class-names";
+import { lookupTicket } from "./api";
 import { isTicketType, TICKET_TYPES, type Ticket, type TicketType } from "./entries";
 import { useTicketUrl } from "./TicketLinks";
 import styles from "./TicketField.module.css";
@@ -19,43 +20,82 @@ export type TicketFieldProps = {
   onSave: (ticket: Ticket | null) => void;
   // Accessible name of the field, e.g. "Ticket, row 3".
   label: string;
-  // "cell" is borderless for the table, "boxed" looks like a form field.
+  // "cell" is borderless for the table and shows the title as tooltip,
+  // "boxed" looks like a form field and shows the title next to the number.
   variant: "cell" | "boxed";
 };
 
-// Shows the ticket and opens a dialog to enter it; the icon next to it opens
-// the ticket in Odoo. The later ticket finder adds more ways to the dialog.
+// Shows the ticket and opens a dialog to look it up in Odoo by type and number;
+// the icon next to it opens the ticket in Odoo. The later ticket finder adds
+// more ways to the dialog.
 export function TicketField({ ticket, onSave, label, variant }: TicketFieldProps) {
   const [open, setOpen] = useState(false);
-  const [draftId, setDraftId] = useState("");
   const [draftType, setDraftType] = useState<TicketType | "">("");
+  const [draftNumber, setDraftNumber] = useState("");
+  // The ticket found for the current type and number; only it can be saved.
+  const [found, setFound] = useState<Ticket | null>(null);
+  const [error, setError] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const url = useTicketUrl(ticket);
-  // An id needs a type; an empty id removes the ticket.
-  const canSave = draftId === "" || draftType !== "";
+  const foundUrl = useTicketUrl(found);
+  // An empty number removes the ticket.
+  const canSave = draftNumber === "" || found !== null;
+  const canSearch = draftType !== "" && draftNumber !== "" && !isSearching;
 
   // Every opening starts from the stored ticket, so a cancelled input is dropped.
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) {
-      setDraftId(ticket?.id ?? "");
       setDraftType(ticket?.type ?? "");
+      setDraftNumber(ticket?.number ?? "");
+      setFound(ticket);
+      setError("");
     }
 
     setOpen(nextOpen);
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  // A changed type or number needs a new search.
+  function handleDraftChange(type: TicketType | "", number: string) {
+    setDraftType(type);
+    setDraftNumber(number);
+    setFound(null);
+    setError("");
+  }
 
-    if (!canSave) {
+  async function handleSearch() {
+    if (draftType === "" || draftNumber === "") {
       return;
     }
 
-    onSave(draftId === "" || draftType === "" ? null : { id: draftId, type: draftType });
-    setOpen(false);
+    setIsSearching(true);
+    setError("");
+
+    try {
+      const result = await lookupTicket(draftType, draftNumber);
+
+      setFound(result);
+      setError(result ? "" : `${TYPE_LABELS[draftType]} ticket ${draftNumber} was not found.`);
+    } catch (searchError) {
+      setError(searchError instanceof Error ? searchError.message : "The search failed.");
+    } finally {
+      setIsSearching(false);
+    }
   }
 
-  const text = ticket ? `${TYPE_ABBREVIATIONS[ticket.type]} ${ticket.id}` : "";
-  const description = ticket ? `${TYPE_LABELS[ticket.type]} ${ticket.id}` : "none";
+  // Enter searches first and saves once a ticket is found.
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (canSave) {
+      onSave(draftNumber === "" ? null : found);
+      setOpen(false);
+    } else if (canSearch) {
+      void handleSearch();
+    }
+  }
+
+  const number = ticket ? `${TYPE_ABBREVIATIONS[ticket.type]} ${ticket.number}` : "";
+  const description = ticket ? `${TYPE_LABELS[ticket.type]} ${ticket.number}: ${ticket.title}` : "none";
 
   return (
     <div className={mergeClassName(styles["ticket-field"], styles[`ticket-field--${variant}`])}>
@@ -64,29 +104,20 @@ export function TicketField({ ticket, onSave, label, variant }: TicketFieldProps
           render={<button type="button" />}
           className={styles["ticket-field__trigger"]}
           aria-label={`${label}: ${description}`}
-          title={ticket ? description : undefined}
+          title={ticket && variant === "cell" ? description : undefined}
         >
-          {text}
+          {variant === "boxed" && ticket ? `${number} – ${ticket.title}` : number}
         </Dialog.Trigger>
         <Dialog.Popup>
           <Dialog.Title>Ticket</Dialog.Title>
           <form className={styles["ticket-field__form"]} onSubmit={handleSubmit}>
-            <Field>
-              <Field.Label>Odoo ID</Field.Label>
-              {/* Digits only: Odoo record ids are whole numbers. */}
-              <Field.Control
-                inputMode="numeric"
-                value={draftId}
-                onChange={(event) => setDraftId(event.currentTarget.value.replace(/\D/g, ""))}
-              />
-            </Field>
             <Field>
               <Field.Label nativeLabel={false} render={<span />}>
                 Type
               </Field.Label>
               <ToggleGroup
                 value={draftType === "" ? [] : [draftType]}
-                onValueChange={(value) => setDraftType(value.find(isTicketType) ?? "")}
+                onValueChange={(value) => handleDraftChange(value.find(isTicketType) ?? "", draftNumber)}
                 aria-label="Ticket type"
               >
                 {TICKET_TYPES.map((type) => (
@@ -96,7 +127,43 @@ export function TicketField({ ticket, onSave, label, variant }: TicketFieldProps
                 ))}
               </ToggleGroup>
             </Field>
-            {!canSave && <p className={styles["ticket-field__hint"]}>Choose a type to save the ticket.</p>}
+            <div className={styles["ticket-field__search"]}>
+              <Field className={styles["ticket-field__number"]}>
+                <Field.Label>Ticket number</Field.Label>
+                {/* Digits only: helpdesk and task numbers are whole numbers. */}
+                <Field.Control
+                  inputMode="numeric"
+                  value={draftNumber}
+                  onChange={(event) => handleDraftChange(draftType, event.currentTarget.value.replace(/\D/g, ""))}
+                />
+              </Field>
+              <Button type="button" disabled={!canSearch} onClick={handleSearch}>
+                {isSearching ? "Searching…" : "Search"}
+              </Button>
+            </div>
+            {/* Announced by screen readers when the search finishes. */}
+            <div aria-live="polite">
+              {found && (
+                <div className={styles["ticket-field__result"]}>
+                  <p className={styles["ticket-field__result-text"]}>
+                    {TYPE_ABBREVIATIONS[found.type]} {found.number} – {found.title}
+                  </p>
+                  {foundUrl && (
+                    <Button.IconLink
+                      href={foundUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      icon={ExternalLinkIcon}
+                      aria-label={`Open ${TYPE_LABELS[found.type]} ${found.number} in Odoo (new tab)`}
+                    />
+                  )}
+                </div>
+              )}
+              {error && <p className={styles["ticket-field__error"]}>{error}</p>}
+              {draftNumber !== "" && draftType === "" && (
+                <p className={styles["ticket-field__hint"]}>Choose a type to search the ticket.</p>
+              )}
+            </div>
             <Button.Group>
               <Button type="submit" disabled={!canSave}>
                 Save

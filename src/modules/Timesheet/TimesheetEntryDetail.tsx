@@ -2,12 +2,16 @@
 
 import { XIcon } from "lucide-react";
 import { useState } from "react";
+import { AlertDialog } from "@/components/AlertDialog";
 import { Button } from "@/components/Button";
 import { Field } from "@/components/Field";
+import { mergeClassName } from "@/lib/class-names";
 import { maskTime } from "@/lib/time";
-import { reviewEntry, saveEntry } from "./api";
+import { reviewEntry, saveEntry, transferEntries, unlinkTransfer } from "./api";
 import {
-  getTicket,
+  applyTransferFields,
+  getTransferBlocker,
+  getTransferStatus,
   roundEntryTime,
   setTicket,
   type Ticket,
@@ -16,6 +20,7 @@ import {
   updateEntry,
 } from "./entries";
 import { TicketField } from "./TicketField";
+import { getTransferStatusText, TransferStatusIcon } from "./TransferStatusIcon";
 import styles from "./TimesheetEntryDetail.module.css";
 import { TimesheetEntryPagination } from "./TimesheetEntryPagination";
 import { usePendingSaves } from "./usePendingSaves";
@@ -43,6 +48,8 @@ export function TimesheetEntryDetail({
 }: TimesheetEntryDetailProps) {
   const [entry, setEntry] = useState(initialEntry);
   const [isReviewing, setIsReviewing] = useState(false);
+  const [isTransferring, setIsTransferring] = useState(false);
+  const [transferMessage, setTransferMessage] = useState("");
   const { trackSave, waitForSaves, navigateAfterSaves, replaceAfterSaves } = usePendingSaves();
   const tableUrl = `/timesheet/${pageId}`;
 
@@ -89,6 +96,41 @@ export function TimesheetEntryDetail({
     }
   }
 
+  // The server reads the entry from the database, so pending saves go first.
+  async function handleTransfer() {
+    setIsTransferring(true);
+    setTransferMessage("");
+
+    try {
+      await waitForSaves();
+      const [result] = await transferEntries([entry.id]);
+
+      setEntry((currentEntry) => applyTransferFields(currentEntry, result.entry));
+      setTransferMessage(result.outcome === "skipped" ? `Not transferred: ${result.message}` : "");
+    } catch (error) {
+      console.error(error);
+      setTransferMessage("The transfer failed.");
+    } finally {
+      setIsTransferring(false);
+    }
+  }
+
+  // Only the transfer fields are taken over, like after a transfer.
+  async function handleUnlink() {
+    setTransferMessage("");
+
+    try {
+      const unlinked = await unlinkTransfer(entry.id);
+
+      setEntry((currentEntry) => applyTransferFields(currentEntry, unlinked));
+    } catch (error) {
+      console.error(error);
+      setTransferMessage("Unlinking failed.");
+    }
+  }
+
+  const transferStatus = getTransferStatus(entry, date);
+  const transferBlocker = getTransferBlocker(entry);
   const fullClassName = styles["timesheet-entry-detail__field--full"];
   const textareaClassName = styles["timesheet-entry-detail__textarea"];
 
@@ -139,7 +181,7 @@ export function TimesheetEntryDetail({
           <Field.Label nativeLabel={false} render={<span />}>
             Ticket
           </Field.Label>
-          <TicketField ticket={getTicket(entry)} onSave={handleTicketSave} label="Ticket" variant="boxed" />
+          <TicketField ticket={entry.ticket} onSave={handleTicketSave} label="Ticket" variant="boxed" />
         </Field>
         <Field className={fullClassName}>
           <Field.Label>Booking text</Field.Label>
@@ -165,6 +207,33 @@ export function TimesheetEntryDetail({
           <Button disabled={isReviewing || entry.bookingText.trim() === ""} onClick={handleReview}>
             {isReviewing ? "Reviewing booking text…" : "Review booking text"}
           </Button>
+        </div>
+        <div className={mergeClassName(fullClassName, styles["timesheet-entry-detail__transfer"])}>
+          <Button disabled={isTransferring || transferBlocker !== null} onClick={handleTransfer}>
+            {isTransferring ? "Transferring…" : "Transfer to Odoo"}
+          </Button>
+          {entry.odooTimesheetId !== null && (
+            <AlertDialog>
+              <AlertDialog.Trigger disabled={isTransferring}>Unlink Odoo line</AlertDialog.Trigger>
+              <AlertDialog.Popup>
+                <AlertDialog.Title>Unlink Odoo line?</AlertDialog.Title>
+                <AlertDialog.Description>
+                  The next transfer creates a new line in Odoo. If the old line still exists there, the booking is
+                  duplicated; the old line is not deleted.
+                </AlertDialog.Description>
+                <Button.Group>
+                  <AlertDialog.Close>Cancel</AlertDialog.Close>
+                  <AlertDialog.Close onClick={handleUnlink}>Unlink</AlertDialog.Close>
+                </Button.Group>
+              </AlertDialog.Popup>
+            </AlertDialog>
+          )}
+          <TransferStatusIcon status={transferStatus} error={entry.transferError} />
+          {/* Announced by screen readers when the transfer finishes. */}
+          <p className={styles["timesheet-entry-detail__transfer-text"]} aria-live="polite">
+            {transferMessage || getTransferStatusText(transferStatus, entry.transferError)}
+            {transferBlocker && ` – cannot transfer: ${transferBlocker}`}
+          </p>
         </div>
         <Field className={fullClassName}>
           <Field.Label>Internal booking text</Field.Label>

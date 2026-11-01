@@ -21,5 +21,5 @@ export function useTicketUrl(ticket: Ticket | null): string | null {
   const templates = useContext(TicketLinksContext);
   const template = ticket ? templates[ticket.type] : undefined;
 
-  return ticket && template ? template.replaceAll("{id}", encodeURIComponent(ticket.id)) : null;
+  return ticket && template ? template.replaceAll("{id}", String(ticket.odooId)) : null;
 }

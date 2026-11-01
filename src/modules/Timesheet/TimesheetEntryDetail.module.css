@@ -41,3 +41,15 @@
 .timesheet-entry-detail__textarea {
   min-height: calc(3lh + 2 * var(--spacing-30) + 2px);
 }
+
+/* Transfer button, status icon and status text on one line. */
+.timesheet-entry-detail__transfer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-30);
+}
+
+.timesheet-entry-detail__transfer-text {
+  margin: 0;
+}

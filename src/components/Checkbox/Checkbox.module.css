@@ -1,0 +1,42 @@
+/* Component styles lose against unlayered module CSS, see docs/guides/css.md. */
+@layer components {
+  .checkbox {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--color-neutral-60);
+    border-radius: var(--border-radius-small);
+    background: var(--color-base-white);
+    color: var(--color-base-white);
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid var(--color-outline);
+      outline-offset: 2px;
+    }
+
+    &[data-checked],
+    &[data-indeterminate] {
+      border-color: var(--color-neutral-80);
+      background: var(--color-neutral-80);
+    }
+
+    &[data-disabled] {
+      border-color: var(--color-neutral-30);
+      background: var(--color-neutral-10);
+      cursor: not-allowed;
+    }
+  }
+
+  .checkbox__indicator {
+    display: flex;
+    font-size: 14px;
+
+    &[data-unchecked] {
+      display: none;
+    }
+  }
+}

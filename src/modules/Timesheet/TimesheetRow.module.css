@@ -11,6 +11,13 @@
   white-space: nowrap;
 }
 
+/* Checkbox and status icon, centered in the height of a text row. */
+.timesheet-row__cell--centered {
+  padding: var(--spacing-30);
+  vertical-align: middle;
+  text-align: center;
+}
+
 .timesheet-row__cell--actions {
   padding: var(--spacing-20);
 }
