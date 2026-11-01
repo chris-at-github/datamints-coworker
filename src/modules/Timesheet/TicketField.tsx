@@ -1,7 +1,7 @@
 "use client";
 
 import { ExternalLinkIcon } from "lucide-react";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, type KeyboardEvent, useState } from "react";
 import { Button } from "@/components/Button";
 import { Dialog } from "@/components/Dialog";
 import { Field } from "@/components/Field";
@@ -83,14 +83,24 @@ export function TicketField({ ticket, onSave, label, variant }: TicketFieldProps
     }
   }
 
-  // Enter searches first and saves once a ticket is found.
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (canSave) {
       onSave(draftNumber === "" ? null : found);
       setOpen(false);
-    } else if (canSearch) {
+    }
+  }
+
+  // Enter in the number field always searches instead of submitting the form.
+  function handleNumberKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (canSearch) {
       void handleSearch();
     }
   }
@@ -136,6 +146,7 @@ export function TicketField({ ticket, onSave, label, variant }: TicketFieldProps
                   inputMode="numeric"
                   value={draftNumber}
                   onChange={(event) => handleDraftChange(draftType, event.currentTarget.value.replace(/\D/g, ""))}
+                  onKeyDown={handleNumberKeyDown}
                 />
               </Field>
               <Button type="button" disabled={!canSearch} onClick={handleSearch}>
