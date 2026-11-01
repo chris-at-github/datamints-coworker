@@ -5,7 +5,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { parseTime } from "@/lib/time";
 import { findEntryWithDate, saveReviewedBookingText } from "@/lib/timesheet-repository";
-import type { TimesheetEntry } from "@/modules/Timesheet/entries";
+import { getBookingTextField, getReviewValues, type TimesheetEntry } from "@/modules/Timesheet/entries";
 
 // Read on every review, so changed rules apply without a restart.
 const TEMPLATE_PATH = path.join(process.cwd(), "prompts", "booking-text-review.md");
@@ -77,7 +77,8 @@ export async function reviewBookingText(entryId: string): Promise<TimesheetEntry
     duration: `${minutes} min`,
     ticketNumber: entry.ticket?.number ?? "",
     ticketTitle: entry.ticket?.title ?? "",
-    bookingText: entry.bookingText,
+    // The displayed text, so edits of the reviewed text are reviewed, not overwritten.
+    bookingText: entry[getBookingTextField(entry)],
     bookingTextInternal: entry.bookingTextInternal,
   };
   // The block is filled first, so its placeholders are resolved before it is inserted.
@@ -98,5 +99,11 @@ export async function reviewBookingText(entryId: string): Promise<TimesheetEntry
     throw new Error(`Review returned no answer (stop reason: ${response.stop_reason})`);
   }
 
-  return saveReviewedBookingText(entry.id, response.parsed_output.optimizedText);
+  const reviewedText = response.parsed_output.optimizedText;
+
+  return saveReviewedBookingText(
+    entry.id,
+    reviewedText,
+    getReviewValues({ ...entry, bookingTextReviewed: reviewedText }),
+  );
 }

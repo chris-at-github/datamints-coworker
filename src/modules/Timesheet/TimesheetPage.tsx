@@ -17,9 +17,11 @@ import {
   updateEntry,
 } from "./entries";
 import { TimesheetHeader } from "./TimesheetHeader";
+import { TimesheetNewForDate } from "./TimesheetNewForDate";
 import { TimesheetPagination } from "./TimesheetPagination";
 import { TimesheetTable } from "./TimesheetTable";
 import { usePendingSaves } from "./usePendingSaves";
+import { useReviewRun } from "./useReviewRun";
 import styles from "./TimesheetPage.module.css";
 
 const ADDED_ROW_COUNT = 5;
@@ -48,17 +50,32 @@ export type TimesheetPageProps = {
   // "New" is disabled then, so there is at most one page per day.
   hasTodayPage: boolean;
   onNew: () => void;
+  // Opens the page of the date, created if there is none yet.
+  onNewForDate: (date: string) => void;
   onNavigate: (pageId: string) => void;
 };
 
 // One page holds the entries of exactly one day; the loaded entries are the
 // starting state, changes are kept here.
-export function TimesheetPage({ page, neighbors, hasTodayPage, onNew, onNavigate }: TimesheetPageProps) {
+export function TimesheetPage({ page, neighbors, hasTodayPage, onNew, onNewForDate, onNavigate }: TimesheetPageProps) {
   const [entries, setEntries] = useState(page.entries);
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set());
   const [isTransferring, setIsTransferring] = useState(false);
-  const [transferMessage, setTransferMessage] = useState("");
+  // Result of the last transfer or review run.
+  const [actionMessage, setActionMessage] = useState("");
   const { trackSave, waitForSaves, navigateAfterSaves } = usePendingSaves();
+  // Only the review fields are taken over, so edits made during the run stay.
+  const reviewRun = useReviewRun((reviewed) =>
+    setEntries((currentEntries) =>
+      currentEntries.map((entry) =>
+        entry.id === reviewed.id
+          ? { ...entry, bookingTextReviewed: reviewed.bookingTextReviewed, reviewedValues: reviewed.reviewedValues }
+          : entry,
+      ),
+    ),
+  );
+  const isReviewing = reviewRun.progress !== null;
+  const isBusy = isTransferring || isReviewing;
 
   function handleChange(entryIndex: number, field: TimesheetField, value: string) {
     setEntries((currentEntries) =>
@@ -92,7 +109,7 @@ export function TimesheetPage({ page, neighbors, hasTodayPage, onNew, onNavigate
     const ids = entries.filter((entry) => selectedIds.has(entry.id)).map((entry) => entry.id);
 
     setIsTransferring(true);
-    setTransferMessage("");
+    setActionMessage("");
 
     try {
       await waitForSaves();
@@ -103,12 +120,29 @@ export function TimesheetPage({ page, neighbors, hasTodayPage, onNew, onNavigate
         currentEntries.map((entry) => applyTransferFields(entry, resultsById.get(entry.id)?.entry ?? null)),
       );
       setSelectedIds(new Set(results.filter((result) => result.outcome !== "transferred").map((result) => result.id)));
-      setTransferMessage(summarizeTransfer(results));
+      setActionMessage(summarizeTransfer(results));
     } catch (error) {
       console.error(error);
-      setTransferMessage("The transfer failed.");
+      setActionMessage("The transfer failed.");
     } finally {
       setIsTransferring(false);
+    }
+  }
+
+  // The server reads the entries from the database, so pending saves go first.
+  // Failed and cancelled rows stay selected for another run.
+  async function handleReview() {
+    setActionMessage("");
+
+    try {
+      await waitForSaves();
+      const { message, retryIds } = await reviewRun.run(entries.filter((entry) => selectedIds.has(entry.id)));
+
+      setSelectedIds(new Set(retryIds));
+      setActionMessage(message);
+    } catch (error) {
+      console.error(error);
+      setActionMessage("The review failed.");
     }
   }
 
@@ -137,6 +171,7 @@ export function TimesheetPage({ page, neighbors, hasTodayPage, onNew, onNavigate
         <Button disabled={hasTodayPage} onClick={onNew}>
           New
         </Button>
+        <TimesheetNewForDate onCreate={onNewForDate} />
       </TimesheetHeader>
       <TimesheetTable
         pageId={page.id}
@@ -152,12 +187,18 @@ export function TimesheetPage({ page, neighbors, hasTodayPage, onNew, onNavigate
       />
       <div className={styles["timesheet-page__actions"]}>
         <Button onClick={handleAddRows}>Add rows</Button>
-        <Button disabled={selectedIds.size === 0 || isTransferring} onClick={handleTransfer}>
+        <Button disabled={selectedIds.size === 0 || isBusy} onClick={handleReview}>
+          {reviewRun.progress
+            ? `Reviewing ${reviewRun.progress.current} of ${reviewRun.progress.total}…`
+            : `Review selected (${selectedIds.size})`}
+        </Button>
+        {isReviewing && <Button onClick={reviewRun.cancel}>Cancel review</Button>}
+        <Button disabled={selectedIds.size === 0 || isBusy} onClick={handleTransfer}>
           {isTransferring ? "Transferring…" : `Transfer selected (${selectedIds.size})`}
         </Button>
-        {/* Announced by screen readers when the transfer finishes. */}
+        {/* Announced by screen readers when a run finishes. */}
         <p className={styles["timesheet-page__message"]} aria-live="polite">
-          {transferMessage}
+          {actionMessage}
         </p>
       </div>
     </section>

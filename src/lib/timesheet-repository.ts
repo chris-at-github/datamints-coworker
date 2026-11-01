@@ -57,6 +57,13 @@ export async function findPage(id: string): Promise<TimesheetPageResult | null> 
   return page && withNavigation(page);
 }
 
+// There is at most one page per day; the oldest wins if there are more.
+export async function findPageIdByDate(date: string): Promise<string | null> {
+  const page = await prisma.timesheetPage.findFirst({ where: { date }, orderBy: { createdAt: "asc" }, select: { id: true } });
+
+  return page?.id ?? null;
+}
+
 export async function pageExists(id: string): Promise<boolean> {
   return (await prisma.timesheetPage.count({ where: { id } })) > 0;
 }
@@ -240,6 +247,12 @@ export async function unlinkTransfer(id: string): Promise<TimesheetEntry | null>
   return count > 0 ? toEntry(await prisma.timesheetEntry.findUniqueOrThrow({ where: { id }, ...ENTRY_QUERY })) : null;
 }
 
-export async function saveReviewedBookingText(id: string, bookingTextReviewed: string): Promise<TimesheetEntry> {
-  return toEntry(await prisma.timesheetEntry.update({ where: { id }, data: { bookingTextReviewed }, ...ENTRY_QUERY }));
+export async function saveReviewedBookingText(
+  id: string,
+  bookingTextReviewed: string,
+  reviewedValues: string,
+): Promise<TimesheetEntry> {
+  return toEntry(
+    await prisma.timesheetEntry.update({ where: { id }, data: { bookingTextReviewed, reviewedValues }, ...ENTRY_QUERY }),
+  );
 }

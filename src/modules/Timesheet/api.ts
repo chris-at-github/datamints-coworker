@@ -100,12 +100,27 @@ export async function deleteEntry(id: string): Promise<void> {
   }
 }
 
-// Creates a page for today with empty rows; the rows are saved as well, so they
-// are there after a reload.
-export async function createPage(): Promise<TimesheetPageData> {
+// Id of the page of a day ("YYYY-MM-DD"), or null if there is none.
+export async function findPageIdByDate(date: string): Promise<string | null> {
+  const response = await fetch(`/api/timesheet-pages?date=${encodeURIComponent(date)}`);
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Finding the page of ${date} failed with status ${response.status}`);
+  }
+
+  return ((await response.json()) as { id: string }).id;
+}
+
+// Creates a page with empty rows, for today by default; the rows are saved as
+// well, so they are there after a reload.
+export async function createPage(date = formatDate(new Date())): Promise<TimesheetPageData> {
   const page: TimesheetPageData = {
     id: crypto.randomUUID(),
-    date: formatDate(new Date()),
+    date,
     entries: createEmptyEntries(NEW_PAGE_ROW_COUNT, 0),
   };
 

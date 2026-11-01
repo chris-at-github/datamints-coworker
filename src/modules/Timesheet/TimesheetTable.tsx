@@ -1,7 +1,7 @@
 import type { MouseEvent } from "react";
 import { Checkbox } from "@/components/Checkbox/Checkbox";
 import { mergeClassName } from "@/lib/class-names";
-import type { Ticket, TimesheetEntry, TimesheetField } from "./entries";
+import { getTotals, type Ticket, type TimesheetEntry, type TimesheetField } from "./entries";
 import { TimesheetRow } from "./TimesheetRow";
 import styles from "./TimesheetTable.module.css";
 
@@ -34,6 +34,7 @@ export function TimesheetTable({
 }: TimesheetTableProps) {
   const narrowHeadClassName = mergeClassName(styles["timesheet-table__head"], styles["timesheet-table__head--narrow"]);
   const selectedCount = entries.filter((entry) => selectedIds.has(entry.id)).length;
+  const totals = getTotals(entries);
 
   function handleSelectedChange(entryId: string, isSelected: boolean) {
     const nextIds = new Set(selectedIds);
@@ -99,6 +100,17 @@ export function TimesheetTable({
           />
         ))}
       </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row" className={styles["timesheet-table__total"]}>
+            <span className="visually-hidden">Total</span>
+          </th>
+          <td className={styles["timesheet-table__total"]}>{totals.startTime}</td>
+          <td className={styles["timesheet-table__total"]}>{totals.endTime}</td>
+          <td className={styles["timesheet-table__total"]}>{totals.duration}</td>
+          <td className={styles["timesheet-table__total"]} colSpan={4} />
+        </tr>
+      </tfoot>
     </table>
   );
 }

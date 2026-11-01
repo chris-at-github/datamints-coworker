@@ -20,3 +20,13 @@
   width: 1%;
   white-space: nowrap;
 }
+
+/* Totals below the entries, aligned with the time columns. */
+.timesheet-table__total {
+  padding: var(--spacing-30);
+  border: 1px solid var(--color-ruler);
+  background: var(--color-neutral-10);
+  color: var(--font-color-important);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}

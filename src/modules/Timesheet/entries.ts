@@ -1,7 +1,8 @@
-import { addDuration, completeTime, getDuration, parseTime, roundTime } from "@/lib/time";
+import { addDuration, completeTime, formatDuration, formatTime, getDuration, parseTime, roundTime } from "@/lib/time";
 
-// Odoo models: "helpdesk" is helpdesk.ticket, "project" is project.task.
-export const TICKET_TYPES = ["helpdesk", "project"] as const;
+// Odoo models: "project" is project.task, "helpdesk" is helpdesk.ticket.
+// The order is the order of the choice in the ticket dialog.
+export const TICKET_TYPES = ["project", "helpdesk"] as const;
 
 export type TicketType = (typeof TICKET_TYPES)[number];
 
@@ -48,6 +49,8 @@ export type TimesheetEntry = TimesheetValues & {
   sorting: number;
   // The ticket of ticketId for display; it is not saved with the entry.
   ticket: Ticket | null;
+  // Written by the review only, see needsReview.
+  reviewedValues: string;
   // Written by the transfer to Odoo only, see getTransferStatus.
   odooTimesheetId: number | null;
   transferredValues: string;
@@ -100,6 +103,7 @@ export function createEmptyEntries(count: number, firstSorting: number): Timeshe
   return Array.from({ length: count }, (_, index) => ({
     ...EMPTY_VALUES,
     ticket: null,
+    reviewedValues: "",
     odooTimesheetId: null,
     transferredValues: "",
     transferError: "",
@@ -126,6 +130,39 @@ export function getBookingTextField(entry: TimesheetValues): "bookingText" | "bo
 
 export function isTicketType(value: unknown): value is TicketType {
   return TICKET_TYPES.includes(value as TicketType);
+}
+
+export type TimesheetTotals = {
+  // Earliest start and latest end, "" without any valid time.
+  startTime: string;
+  endTime: string;
+  // Sum of all durations, so breaks between entries do not count.
+  duration: string;
+};
+
+// Empty and invalid values are left out.
+export function getTotals(entries: TimesheetValues[]): TimesheetTotals {
+  const minutesOf = (field: "startTime" | "endTime" | "duration") =>
+    entries.map((entry) => parseTime(entry[field])).filter((minutes) => minutes !== null);
+  const starts = minutesOf("startTime");
+  const ends = minutesOf("endTime");
+
+  return {
+    startTime: starts.length > 0 ? formatTime(Math.min(...starts)) : "",
+    endTime: ends.length > 0 ? formatTime(Math.max(...ends)) : "",
+    duration: formatDuration(minutesOf("duration").reduce((sum, minutes) => sum + minutes, 0)),
+  };
+}
+
+// The values the review depends on: the displayed text and the duration, which
+// picks the size block of the prompt.
+export function getReviewValues(entry: TimesheetValues): string {
+  return JSON.stringify({ text: entry[getBookingTextField(entry)], duration: entry.duration });
+}
+
+// Never reviewed, or changed since the last review.
+export function needsReview(entry: TimesheetEntry): boolean {
+  return entry.reviewedValues !== getReviewValues(entry);
 }
 
 // The values that go to Odoo; a stored copy tells whether the entry changed since.

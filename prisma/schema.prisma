@@ -32,6 +32,9 @@ model TimesheetEntry {
   bookingText         String        @default("")
   bookingTextInternal String        @default("")
   bookingTextReviewed String        @default("")
+  // Displayed text and duration right after the last review, as JSON; tells
+  // whether the entry changed since.
+  reviewedValues      String        @default("")
   // Transfer to Odoo: the timesheet line, the transferred values as JSON (to
   // detect later changes) and the message of the last failed transfer.
   odooTimesheetId     Int?

@@ -10,6 +10,7 @@ import { maskTime } from "@/lib/time";
 import { reviewEntry, saveEntry, transferEntries, unlinkTransfer } from "./api";
 import {
   applyTransferFields,
+  getBookingTextField,
   getTransferBlocker,
   getTransferStatus,
   roundEntryTime,
@@ -87,8 +88,8 @@ export function TimesheetEntryDetail({
 
     try {
       await waitForSaves();
-      const { bookingTextReviewed } = await reviewEntry(entry.id);
-      setEntry((currentEntry) => ({ ...currentEntry, bookingTextReviewed }));
+      const { bookingTextReviewed, reviewedValues } = await reviewEntry(entry.id);
+      setEntry((currentEntry) => ({ ...currentEntry, bookingTextReviewed, reviewedValues }));
     } catch (error) {
       console.error(error);
     } finally {
@@ -204,7 +205,7 @@ export function TimesheetEntryDetail({
           />
         </Field>
         <div className={fullClassName}>
-          <Button disabled={isReviewing || entry.bookingText.trim() === ""} onClick={handleReview}>
+          <Button disabled={isReviewing || entry[getBookingTextField(entry)].trim() === ""} onClick={handleReview}>
             {isReviewing ? "Reviewing booking text…" : "Review booking text"}
           </Button>
         </div>

@@ -14,6 +14,12 @@ export function formatTime(minutes: number): string {
   return `${String(hours).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 }
 
+// Formats a sum of minutes as "H:MM", e.g. "7:45" or "10:15"; unlike formatTime
+// without a leading zero, because it is a duration, not a time of day.
+export function formatDuration(minutes: number): string {
+  return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, "0")}`;
+}
+
 // Missing times or an end that is not after the start count as zero.
 export function getDuration(startTime: string, endTime: string): string {
   const start = parseTime(startTime);

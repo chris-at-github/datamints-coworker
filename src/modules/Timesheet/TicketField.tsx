@@ -45,7 +45,8 @@ export function TicketField({ ticket, onSave, label, variant }: TicketFieldProps
   // Every opening starts from the stored ticket, so a cancelled input is dropped.
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) {
-      setDraftType(ticket?.type ?? "");
+      // Project tasks are booked most often, so they are preselected without a ticket.
+      setDraftType(ticket?.type ?? "project");
       setDraftNumber(ticket?.number ?? "");
       setFound(ticket);
       setError("");

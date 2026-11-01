@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { formatDate } from "@/lib/date";
-import { createPage, fetchPage } from "./api";
+import { createPage, fetchPage, findPageIdByDate } from "./api";
 import type { TimesheetPageResult } from "./entries";
 import { TimesheetPage } from "./TimesheetPage";
 
@@ -66,6 +66,17 @@ export function Timesheet({ pageId }: TimesheetProps) {
     }
   }
 
+  // At most one page per day: an existing page of the date is opened instead.
+  async function handleNewForDate(date: string) {
+    try {
+      const existingId = await findPageIdByDate(date);
+
+      router.push(`/timesheet/${existingId ?? (await createPage(date)).id}`);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   // Like "New", every page gets a history entry, so the browser's back button pages back.
   function handleNavigate(targetPageId: string) {
     router.push(`/timesheet/${targetPageId}`);
@@ -84,9 +95,10 @@ export function Timesheet({ pageId }: TimesheetProps) {
       key={state.page.id}
       page={state.page}
       neighbors={state.neighbors}
-      // Pages are only created for today, so the latest date tells whether today's page exists.
+      // Pages are created for today or earlier, so the latest date tells whether today's page exists.
       hasTodayPage={state.latestDate === formatDate(new Date())}
       onNew={handleNew}
+      onNewForDate={handleNewForDate}
       onNavigate={handleNavigate}
     />
   );

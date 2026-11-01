@@ -1,0 +1,11 @@
+.timesheet-new-for-date__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-40);
+}
+
+.timesheet-new-for-date__hint {
+  margin: 0;
+  color: var(--font-color-muted);
+  font-size: var(--font-size-small);
+}
