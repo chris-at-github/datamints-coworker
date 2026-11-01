@@ -6,7 +6,16 @@ import { Button } from "@/components/Button";
 import { Field } from "@/components/Field";
 import { maskTime } from "@/lib/time";
 import { reviewEntry, saveEntry } from "./api";
-import { roundEntryTime, type TimesheetEntry, type TimesheetField, updateEntry } from "./entries";
+import {
+  getTicket,
+  roundEntryTime,
+  setTicket,
+  type Ticket,
+  type TimesheetEntry,
+  type TimesheetField,
+  updateEntry,
+} from "./entries";
+import { TicketField } from "./TicketField";
 import styles from "./TimesheetEntryDetail.module.css";
 import { TimesheetEntryPagination } from "./TimesheetEntryPagination";
 import { usePendingSaves } from "./usePendingSaves";
@@ -54,6 +63,13 @@ export function TimesheetEntryDetail({
       setEntry(nextEntry);
     }
 
+    trackSave(saveEntry(pageId, nextEntry));
+  }
+
+  function handleTicketSave(ticket: Ticket | null) {
+    const nextEntry = setTicket(entry, ticket);
+
+    setEntry(nextEntry);
     trackSave(saveEntry(pageId, nextEntry));
   }
 
@@ -119,12 +135,11 @@ export function TimesheetEntryDetail({
           <Field.Control value={entry.duration} readOnly />
         </Field>
         <Field className={fullClassName}>
-          <Field.Label>Ticket</Field.Label>
-          <Field.Control
-            value={entry.ticket}
-            onChange={(event) => handleChange("ticket", event.currentTarget.value)}
-            onBlur={() => handleBlur("ticket")}
-          />
+          {/* Not a native label: the field is a button that opens the ticket dialog. */}
+          <Field.Label nativeLabel={false} render={<span />}>
+            Ticket
+          </Field.Label>
+          <TicketField ticket={getTicket(entry)} onSave={handleTicketSave} label="Ticket" variant="boxed" />
         </Field>
         <Field className={fullClassName}>
           <Field.Label>Booking text</Field.Label>

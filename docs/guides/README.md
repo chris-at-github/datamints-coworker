@@ -11,9 +11,10 @@ bewusst kurz gehalten und zum Nachschlagen gedacht, nicht zum Durchlesen.
 | DDEV | [ddev.md](ddev.md) | Umgebung starten, Befehle im Container, Dev-Server hinter dem Router, Build |
 | CSS | [css.md](css.md) | Globale Styles, Cascade Layers, CSS-Module, Komponenten und Module, Base-UI-Vorbereitung, mitwachsende Textfelder |
 | Base UI | [base-ui.md](base-ui.md) | Eigene Komponenten um Base UI, Server-/Client-Komponenten, Zustände stylen |
-| Prisma | [prisma.md](prisma.md) | Einrichtung nach dem Klonen, Migrationen, Dev-Server-Neustart, Client erzeugen, Testdaten, Datenbank zurücksetzen und ansehen |
+| Prisma | [prisma.md](prisma.md) | Einrichtung nach dem Klonen, Migrationen (auch mit Datenverlust), Dev-Server-Neustart, Client erzeugen, Testdaten, Datenbank zurücksetzen und ansehen |
 | Linting | [lint.md](lint.md) | ESLint und Stylelint ausführen, Befunde beheben, `.editorconfig`, PhpStorm-Einrichtung |
 | Claude API | [claude-api.md](claude-api.md) | API-Key erstellen, Konfiguration in `.env`, Template und Platzhalter, Prüfung per `curl` |
+| Odoo | [odoo.md](odoo.md) | URL-Vorlagen für Ticket-Links in `.env`, Odoo-ID statt Ticketnummer |
 
 ## Aufbau
 

@@ -1,7 +1,8 @@
 import { type MouseEvent, useState } from "react";
 import { mergeClassName } from "@/lib/class-names";
 import { maskTime } from "@/lib/time";
-import { getBookingTextField, isEntryEmpty, type TimesheetEntry, type TimesheetField } from "./entries";
+import { getBookingTextField, getTicket, isEntryEmpty, type Ticket, type TimesheetEntry, type TimesheetField } from "./entries";
+import { TicketField } from "./TicketField";
 import { TimesheetRowActions } from "./TimesheetRowActions";
 import styles from "./TimesheetRow.module.css";
 
@@ -12,11 +13,22 @@ export type TimesheetRowProps = {
   onChange: (field: TimesheetField, value: string) => void;
   // Called when a field is left; the page rounds time fields and saves the entry.
   onBlur: (field: TimesheetField) => void;
+  // Saves right away, like a blur.
+  onTicketSave: (ticket: Ticket | null) => void;
   onDelete: () => void;
   onEdit: (event: MouseEvent<HTMLAnchorElement>, href: string) => void;
 };
 
-export function TimesheetRow({ entry, rowNumber, editHref, onChange, onBlur, onDelete, onEdit }: TimesheetRowProps) {
+export function TimesheetRow({
+  entry,
+  rowNumber,
+  editHref,
+  onChange,
+  onBlur,
+  onTicketSave,
+  onDelete,
+  onEdit,
+}: TimesheetRowProps) {
   // Locked on focus, so clearing a reviewed text does not switch to the original while typing.
   const [editedBookingTextField, setEditedBookingTextField] = useState<TimesheetField | null>(null);
   const bookingTextField = editedBookingTextField ?? getBookingTextField(entry);
@@ -58,14 +70,7 @@ export function TimesheetRow({ entry, rowNumber, editHref, onChange, onBlur, onD
         {entry.duration}
       </td>
       <td className={styles["timesheet-row__cell"]}>
-        <input
-          className={shortClassName}
-          type="text"
-          value={entry.ticket}
-          onChange={(event) => onChange("ticket", event.target.value)}
-          onBlur={() => onBlur("ticket")}
-          aria-label={`Ticket, row ${rowNumber}`}
-        />
+        <TicketField ticket={getTicket(entry)} onSave={onTicketSave} label={`Ticket, row ${rowNumber}`} variant="cell" />
       </td>
       <td className={styles["timesheet-row__cell"]}>
         <textarea

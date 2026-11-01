@@ -1,6 +1,6 @@
 import type { MouseEvent } from "react";
 import { mergeClassName } from "@/lib/class-names";
-import type { TimesheetEntry, TimesheetField } from "./entries";
+import type { Ticket, TimesheetEntry, TimesheetField } from "./entries";
 import { TimesheetRow } from "./TimesheetRow";
 import styles from "./TimesheetTable.module.css";
 
@@ -9,12 +9,21 @@ export type TimesheetTableProps = {
   entries: TimesheetEntry[];
   onChange: (index: number, field: TimesheetField, value: string) => void;
   onBlur: (index: number, field: TimesheetField) => void;
+  onTicketSave: (index: number, ticket: Ticket | null) => void;
   onDelete: (index: number) => void;
   // Click on the edit link of a row; may wait for pending saves before navigating.
   onEdit: (event: MouseEvent<HTMLAnchorElement>, href: string) => void;
 };
 
-export function TimesheetTable({ pageId, entries, onChange, onBlur, onDelete, onEdit }: TimesheetTableProps) {
+export function TimesheetTable({
+  pageId,
+  entries,
+  onChange,
+  onBlur,
+  onTicketSave,
+  onDelete,
+  onEdit,
+}: TimesheetTableProps) {
   const narrowHeadClassName = mergeClassName(styles["timesheet-table__head"], styles["timesheet-table__head--narrow"]);
 
   return (
@@ -49,6 +58,7 @@ export function TimesheetTable({ pageId, entries, onChange, onBlur, onDelete, on
             editHref={`/timesheet/${pageId}/entries/${entry.id}`}
             onChange={(field, value) => onChange(index, field, value)}
             onBlur={(field) => onBlur(index, field)}
+            onTicketSave={(ticket) => onTicketSave(index, ticket)}
             onDelete={() => onDelete(index)}
             onEdit={onEdit}
           />

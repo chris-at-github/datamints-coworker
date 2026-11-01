@@ -1,11 +1,24 @@
 import { addDuration, completeTime, getDuration, roundTime } from "@/lib/time";
 
+// Odoo models: "helpdesk" is helpdesk.ticket, "project" is project.task.
+export const TICKET_TYPES = ["helpdesk", "project"] as const;
+
+export type TicketType = (typeof TICKET_TYPES)[number];
+
+export type Ticket = {
+  id: string;
+  type: TicketType;
+};
+
 // The editable values of one row.
 export type TimesheetValues = {
   startTime: string;
   endTime: string;
   duration: string;
-  ticket: string;
+  // Odoo record id, which can differ from the ticket number shown in Odoo.
+  ticketId: string;
+  // A TicketType; anything else, e.g. "", means the entry has no ticket.
+  ticketType: string;
   bookingText: string;
   bookingTextInternal: string;
   // Rewritten booking text, e.g. by the review; the original stays in bookingText.
@@ -18,7 +31,8 @@ export const TIMESHEET_FIELDS: TimesheetField[] = [
   "startTime",
   "endTime",
   "duration",
-  "ticket",
+  "ticketId",
+  "ticketType",
   "bookingText",
   "bookingTextInternal",
   "bookingTextReviewed",
@@ -56,7 +70,8 @@ const EMPTY_VALUES: TimesheetValues = {
   startTime: "",
   endTime: "",
   duration: "",
-  ticket: "",
+  ticketId: "",
+  ticketType: "",
   bookingText: "",
   bookingTextInternal: "",
   bookingTextReviewed: "",
@@ -85,6 +100,20 @@ export function isEntryEmpty(entry: TimesheetEntry): boolean {
 // text, or the original as long as there is none.
 export function getBookingTextField(entry: TimesheetValues): "bookingText" | "bookingTextReviewed" {
   return entry.bookingTextReviewed === "" ? "bookingText" : "bookingTextReviewed";
+}
+
+export function isTicketType(value: unknown): value is TicketType {
+  return TICKET_TYPES.includes(value as TicketType);
+}
+
+// An entry has a ticket only with an id and a known type.
+export function getTicket(entry: TimesheetValues): Ticket | null {
+  return entry.ticketId !== "" && isTicketType(entry.ticketType) ? { id: entry.ticketId, type: entry.ticketType } : null;
+}
+
+// Sets or clears the ticket; both fields change together, so one save stores them.
+export function setTicket<T extends TimesheetValues>(entry: T, ticket: Ticket | null): T {
+  return { ...entry, ticketId: ticket?.id ?? "", ticketType: ticket?.type ?? "" };
 }
 
 // Start and end time drive the duration; an edited duration moves the end time.

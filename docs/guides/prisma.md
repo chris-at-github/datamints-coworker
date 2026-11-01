@@ -46,6 +46,26 @@ ddev exec npm run db:migrate -- --name add-timesheet-entry
 - Migrationen werden committet, sie sind die Historie des Schemas.
 - Ohne `--name` fragt Prisma interaktiv nach einem Namen.
 
+## Migration mit Datenverlust
+
+**Problem:** `db:migrate` bricht ab mit „environment is non-interactive“, weil
+die Änderung Daten löscht (z. B. Spalte umbenannt) und Prisma eine Bestätigung
+verlangt, die ohne Terminal nicht möglich ist.
+
+**Vorgehen:** SQL erzeugen, als Migration ablegen und einspielen:
+
+```bash
+ddev exec npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script
+# Ausgabe nach prisma/migrations/<JJJJMMTThhmmss>_<name>/migration.sql speichern
+ddev exec npx prisma migrate deploy
+ddev exec npm run db:generate
+```
+
+**Hinweise:**
+
+- Das SQL vorher lesen: Gelöschte Spalten fehlen im `INSERT … SELECT`.
+- Danach den Dev-Server neu starten.
+
 ## Dev-Server nach Schemaänderungen neu starten
 
 **Problem:** Nach `db:migrate` oder `db:generate` antworten API-Routen mit 500,

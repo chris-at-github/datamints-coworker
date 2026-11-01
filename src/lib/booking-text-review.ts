@@ -75,7 +75,8 @@ export async function reviewBookingText(entryId: string): Promise<TimesheetEntry
     startTime: entry.startTime,
     endTime: entry.endTime,
     duration: `${minutes} min`,
-    ticket: entry.ticket,
+    ticketId: entry.ticketId,
+    ticketType: entry.ticketType,
     bookingText: entry.bookingText,
     bookingTextInternal: entry.bookingTextInternal,
   };

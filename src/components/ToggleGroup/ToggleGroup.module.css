@@ -1,0 +1,42 @@
+/* Component styles lose against unlayered module CSS, see docs/guides/css.md. */
+@layer components {
+  /* Items sit side by side like one segmented button. */
+  .toggle-group {
+    display: inline-flex;
+    gap: var(--spacing-10);
+    padding: var(--spacing-10);
+    border-radius: var(--border-radius-default);
+    background: var(--color-neutral-10);
+  }
+
+  .toggle-group__item {
+    min-height: 37px;
+    padding: var(--spacing-20) var(--spacing-50);
+    border: none;
+    border-radius: var(--border-radius-small);
+    background: transparent;
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    user-select: none;
+
+    /* Placed before :hover, which has a higher specificity (no-descending-specificity). */
+    &:focus-visible:not([data-disabled]) {
+      outline: 2px solid var(--color-outline);
+      outline-offset: 2px;
+    }
+
+    &:hover:not([data-disabled], [data-pressed]) {
+      background: var(--color-neutral-20);
+    }
+
+    &[data-pressed] {
+      background: var(--color-base-white);
+      color: var(--font-color-important);
+    }
+
+    &[data-disabled] {
+      color: var(--color-neutral-50);
+      cursor: not-allowed;
+    }
+  }
+}

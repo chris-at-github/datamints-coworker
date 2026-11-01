@@ -27,7 +27,9 @@ model TimesheetEntry {
   startTime           String        @default("")
   endTime             String        @default("")
   duration            String        @default("")
-  ticket              String        @default("")
+  // Odoo record id, not the ticket number shown in Odoo; "helpdesk" or "project".
+  ticketId            String        @default("")
+  ticketType          String        @default("")
   bookingText         String        @default("")
   bookingTextInternal String        @default("")
   bookingTextReviewed String        @default("")

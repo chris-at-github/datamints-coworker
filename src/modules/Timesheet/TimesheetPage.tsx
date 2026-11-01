@@ -7,6 +7,8 @@ import {
   createEmptyEntries,
   getNextSorting,
   roundEntryTime,
+  setTicket,
+  type Ticket,
   type TimesheetField,
   type TimesheetNeighbors,
   type TimesheetPageData,
@@ -54,6 +56,13 @@ export function TimesheetPage({ page, neighbors, hasTodayPage, onNew, onNavigate
     trackSave(saveEntry(page.id, nextEntry));
   }
 
+  function handleTicketSave(entryIndex: number, ticket: Ticket | null) {
+    const nextEntry = setTicket(entries[entryIndex], ticket);
+
+    setEntries((currentEntries) => currentEntries.map((current, index) => (index === entryIndex ? nextEntry : current)));
+    trackSave(saveEntry(page.id, nextEntry));
+  }
+
   // The row disappears at once, the request runs in the background.
   function handleDelete(entryIndex: number) {
     const entry = entries[entryIndex];
@@ -84,6 +93,7 @@ export function TimesheetPage({ page, neighbors, hasTodayPage, onNew, onNavigate
         entries={entries}
         onChange={handleChange}
         onBlur={handleBlur}
+        onTicketSave={handleTicketSave}
         onDelete={handleDelete}
         onEdit={navigateAfterSaves}
       />
