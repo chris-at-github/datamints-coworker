@@ -26,10 +26,39 @@ function readConfig() {
   return { url: url.replace(/\/+$/, ""), apiKey, database: process.env.ODOO_DATABASE || undefined };
 }
 
+type OdooContext = Record<string, unknown>;
+
+let userContextPromise: Promise<OdooContext> | null = null;
+
+// Language and time zone of the API key's user, asked once per server process.
+// Without them Odoo answers in English: translated names (e.g. of projects)
+// differ from what the user sees, and searches miss them.
+function getUserContext(): Promise<OdooContext> {
+  userContextPromise ??= request<OdooContext>("res.users", "context_get", {}).catch((error: unknown) => {
+    // Asked again on the next call instead of keeping the failure.
+    userContextPromise = null;
+    throw error;
+  });
+
+  return userContextPromise;
+}
+
+// The Odoo user of the API key.
+export async function getOdooUid(): Promise<number> {
+  return (await getUserContext()).uid as number;
+}
+
 // Calls a model method with named parameters: "ids" for record methods, method
 // arguments by name (positional arguments are not supported). Every call is
-// its own transaction in Odoo.
+// its own transaction in Odoo and runs in the user's context; a context in the
+// params is merged over it.
 export async function callOdoo<T>(model: string, method: string, params: Record<string, unknown> = {}): Promise<T> {
+  const context = { ...(await getUserContext()), ...(params.context as OdooContext | undefined) };
+
+  return request<T>(model, method, { ...params, context });
+}
+
+async function request<T>(model: string, method: string, params: Record<string, unknown>): Promise<T> {
   const { url, apiKey, database } = readConfig();
   const response = await fetch(`${url}/json/2/${model}/${method}`, {
     method: "POST",

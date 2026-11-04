@@ -1,0 +1,27 @@
+.ticket-row__number {
+  flex: none;
+  min-width: 5ch;
+  color: var(--font-color-muted);
+}
+
+.ticket-row__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticket-row__info {
+  flex: none;
+  color: var(--font-color-muted);
+  font-size: var(--font-size-small);
+}
+
+/* Small inside a row instead of the square button size. */
+.ticket-row__link {
+  min-width: 0;
+  min-height: 0;
+  padding: var(--spacing-10);
+  background: transparent;
+}

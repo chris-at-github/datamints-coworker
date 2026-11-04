@@ -1,8 +1,6 @@
 import { formatDate } from "@/lib/date";
 import {
   createEmptyEntries,
-  type Ticket,
-  type TicketType,
   type TimesheetEntry,
   type TimesheetPageData,
   type TimesheetPageResult,
@@ -48,27 +46,6 @@ export async function reviewEntry(id: string): Promise<TimesheetEntry> {
   });
 
   return entry;
-}
-
-// Answers null if Odoo has no such ticket; other failures throw with the server's message.
-export async function lookupTicket(type: TicketType, number: string): Promise<Ticket | null> {
-  const response = await fetch("/api/tickets/lookup", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ type, number }),
-  });
-
-  if (response.status === 404) {
-    return null;
-  }
-
-  const body = (await response.json().catch(() => ({}))) as { ticket?: Ticket; error?: string };
-
-  if (!response.ok || !body.ticket) {
-    throw new Error(body.error ?? `Ticket lookup failed with status ${response.status}`);
-  }
-
-  return body.ticket;
 }
 
 // Transfers the entries to Odoo; the results carry the updated entries.

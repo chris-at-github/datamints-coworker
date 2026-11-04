@@ -1,0 +1,61 @@
+/* Component styles lose against unlayered module CSS, see docs/guides/css.md. */
+@layer components {
+  /* Vertical tabs sit next to their panel, horizontal ones above it. */
+  .tabs {
+    display: flex;
+    flex-direction: column;
+
+    &[data-orientation="vertical"] {
+      flex-direction: row;
+    }
+  }
+
+  .tabs__list {
+    display: flex;
+    gap: var(--spacing-10);
+
+    &[data-orientation="vertical"] {
+      flex-direction: column;
+    }
+  }
+
+  .tabs__tab {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-30);
+    padding: var(--spacing-20) var(--spacing-30);
+    border: none;
+    border-radius: var(--border-radius-small);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+
+    /* Placed before :hover, which has a higher specificity (no-descending-specificity). */
+    &:focus-visible {
+      outline: 2px solid var(--color-outline);
+      outline-offset: -2px;
+    }
+
+    &:hover:not([data-active]) {
+      background: var(--color-neutral-10);
+    }
+
+    &[data-active] {
+      background: var(--color-background-active);
+      color: var(--font-color-important);
+      font-weight: var(--font-weight-medium);
+    }
+  }
+
+  .tabs__panel {
+    flex: 1;
+    min-width: 0;
+
+    &:focus-visible {
+      outline: 2px solid var(--color-outline);
+      outline-offset: -2px;
+    }
+  }
+}

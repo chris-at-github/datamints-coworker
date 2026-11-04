@@ -51,46 +51,7 @@
   background: transparent;
 }
 
-.ticket-field__form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-50);
-}
-
-/* Number input and search button on one line, aligned at the bottom. */
-.ticket-field__search {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--spacing-30);
-}
-
-.ticket-field__number {
-  flex: 1;
-}
-
-.ticket-field__error,
-.ticket-field__hint {
-  margin: 0;
-}
-
-/* Number and title of the found ticket, the link icon on the right. */
-.ticket-field__result {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-30);
-}
-
-.ticket-field__result-text {
-  margin: 0;
-  color: var(--font-color-important);
-}
-
-.ticket-field__error {
-  color: oklch(50% 0.2 25deg);
-}
-
-.ticket-field__hint {
-  color: var(--font-color-muted);
-  font-size: var(--font-size-small);
+/* Wide enough for the navigation and the lists of the ticket picker. */
+.ticket-field__popup {
+  width: min(820px, 100% - 2 * var(--page-spacing-x));
 }

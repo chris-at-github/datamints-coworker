@@ -1,9 +1,9 @@
 import { readJsonObject } from "@/lib/request";
-import { lookupTicket } from "@/lib/tickets";
+import { lookupTicket } from "@/lib/ticket-picker";
 import { isTicketType } from "@/modules/Timesheet/entries";
 
-// Finds a ticket by type and number in Odoo and answers with the stored ticket.
-// Odoo errors answer 502 with Odoo's message; they are logged on the server.
+// Preview of "Enter number": the ticket of the type, or else the ticket with the
+// same number of the other type; nothing is stored. Odoo errors answer 502.
 export async function POST(request: Request) {
   const body = await readJsonObject(request);
   const number = typeof body?.number === "string" ? body.number.trim() : "";
@@ -13,9 +13,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const ticket = await lookupTicket(body.type, number);
-
-    return ticket ? Response.json({ ticket }) : Response.json({ error: "Ticket not found" }, { status: 404 });
+    return Response.json(await lookupTicket(body.type, number));
   } catch (error) {
     console.error(error);
 

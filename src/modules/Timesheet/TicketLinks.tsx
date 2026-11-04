@@ -17,7 +17,7 @@ export function TicketLinksProvider({ templates, children }: TicketLinksProvider
 }
 
 // The Odoo URL of a ticket; null without a ticket or a template for its type.
-export function useTicketUrl(ticket: Ticket | null): string | null {
+export function useTicketUrl(ticket: Pick<Ticket, "type" | "odooId"> | null): string | null {
   const templates = useContext(TicketLinksContext);
   const template = ticket ? templates[ticket.type] : undefined;
 

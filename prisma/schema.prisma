@@ -58,7 +58,28 @@ model Ticket {
   projectOdooId    Int?
   allowsTimesheets Boolean          @default(false)
   lastUsedAt       DateTime         @default(now())
+  // Helpdesk team of a ticket or project of a task.
+  groupId          String?
+  group            TicketGroup?     @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  // Set while the ticket is a favorite of the ticket picker.
+  favoritedAt      DateTime?
   entries          TimesheetEntry[]
+
+  @@unique([type, odooId])
+}
+
+// A helpdesk team ("helpdesk") or a project ("project") from Odoo; stored when
+// a ticket of it is stored or the group is pinned or opened in the ticket picker.
+model TicketGroup {
+  id         String    @id
+  type       String
+  odooId     Int
+  name       String
+  // Customer of a project; teams have none in Odoo.
+  customer   String    @default("")
+  pinnedAt   DateTime?
+  lastUsedAt DateTime?
+  tickets    Ticket[]
 
   @@unique([type, odooId])
 }

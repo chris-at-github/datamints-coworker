@@ -1,0 +1,19 @@
+.ticket-badge {
+  flex: none;
+  padding: 0 var(--spacing-20);
+  border-radius: var(--border-radius-small);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+
+  /* No tokens for the two types; the colors only tell them apart. */
+  &[data-type="helpdesk"] {
+    background: oklch(93% 0.04 295deg);
+    color: oklch(40% 0.15 295deg);
+  }
+
+  &[data-type="project"] {
+    background: oklch(94% 0.04 180deg);
+    color: oklch(40% 0.08 180deg);
+  }
+}

@@ -58,6 +58,46 @@ ddev exec 'curl -s -X POST -H "Authorization: bearer $(grep ^ODOO_API_KEY= .env 
 - Antwort mit `"name": "werkzeug.exceptions.Unauthorized"`: Key fehlt, ist
   falsch oder abgelaufen.
 
+## Sprache der Abfragen
+
+**Problem:** Ein Projekt heißt in Odoo „S01751 Relaunch Stadt
+Unterschleissheim (USH)“, eine eigene Abfrage liefert aber nur „S01751“, und
+die Suche nach „Unterschleissheim“ findet nichts.
+
+**Vorgehen:** Übersetzbare Felder (z. B. Projektnamen) liefert Odoo ohne
+Sprache auf Englisch. Bei eigenen Abfragen den Kontext mitgeben:
+
+```json
+{ "domain": [["name", "ilike", "Unterschleissheim"]], "fields": ["name"], "context": { "lang": "de_DE" } }
+```
+
+**Hinweise:**
+
+- `callOdoo` in `src/lib/odoo-client.ts` schickt den Kontext des Benutzers
+  (Sprache, Zeitzone aus `res.users/context_get`) bei jedem Aufruf mit; er wird
+  einmal pro Serverprozess geholt.
+- Ändert sich die Sprache des Benutzers in Odoo, den Dev-Server neu starten.
+
+## Daten des Ticket-Pickers
+
+**Problem:** Wo liegen Favoriten, angepinnte Teams/Projekte und der zuletzt
+genutzte Tab?
+
+**Vorgehen:**
+
+| Was | Wo |
+| --- | --- |
+| Favoriten | SQLite, `Ticket.favoritedAt` |
+| Angepinnte und zuletzt verwendete Teams/Projekte | SQLite, Tabelle `TicketGroup` (`pinnedAt`, `lastUsedAt`) |
+| Zuletzt gebucht | SQLite, aus den Einträgen (`TimesheetEntry.ticketId`) |
+| Zuletzt genutzter Tab | localStorage des Browsers, Schlüssel `ticket-picker:view` |
+
+**Hinweise:**
+
+- Favoriten, „Zuletzt gebucht“ und angepinnte Gruppen funktionieren ohne Odoo.
+- Namen von Teams und Projekten werden beim Öffnen im Picker aus Odoo
+  aufgefrischt, Ticket-Titel beim Übernehmen eines Tickets.
+
 ## In Odoo gelöschte Zeitbuchung
 
 **Problem:** Eine übertragene Buchung wurde in Odoo gelöscht; die nächste
