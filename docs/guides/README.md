@@ -7,11 +7,12 @@ bewusst kurz gehalten und zum Nachschlagen gedacht, nicht zum Durchlesen.
 
 | Thema | Datei | Inhalt |
 | --- | --- | --- |
+| Einrichtung | [setup.md](setup.md) | Projekt auf einem neuen Rechner einrichten, Status 500 durch leere Datenbank |
 | Git | [git.md](git.md) | Squash-Merge, Dev-Server nach dem Merge neu starten, Commit-Typen |
 | DDEV | [ddev.md](ddev.md) | Umgebung starten, Befehle im Container, Dev-Server hinter dem Router, Build |
 | CSS | [css.md](css.md) | Globale Styles, Cascade Layers, CSS-Module, Komponenten und Module, Base-UI-Vorbereitung, mitwachsende Textfelder |
 | Base UI | [base-ui.md](base-ui.md) | Eigene Komponenten um Base UI, Server-/Client-Komponenten, Zustände stylen |
-| Prisma | [prisma.md](prisma.md) | Einrichtung nach dem Klonen, Migrationen (auch mit Datenverlust), Dev-Server-Neustart, Client erzeugen, Testdaten, Datenbank zurücksetzen und ansehen |
+| Prisma | [prisma.md](prisma.md) | Migrationen (auch mit Datenverlust), Dev-Server-Neustart, Client erzeugen, Testdaten, Datenbank zurücksetzen und ansehen |
 | Linting | [lint.md](lint.md) | ESLint und Stylelint ausführen, Befunde beheben, `.editorconfig`, PhpStorm-Einrichtung |
 | Claude API | [claude-api.md](claude-api.md) | API-Key erstellen, Konfiguration in `.env`, Template und Platzhalter, Prüfung per `curl` |
 | Odoo | [odoo.md](odoo.md) | API-Key einrichten und erneuern, Verbindung prüfen, Sprache der Abfragen, Daten des Ticket-Pickers, gelöschte Zeitbuchung, URL-Vorlagen für Ticket-Links |

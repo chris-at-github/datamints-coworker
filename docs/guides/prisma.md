@@ -6,16 +6,7 @@ SQLite-Datei zu. Die Datenbank-URL steht in `.env` und wird in
 
 ## Nach dem Klonen einrichten
 
-**Problem:** Auf einem frischen Stand fehlen `.env`, der erzeugte Client und die
-Datenbankdatei.
-
-**Vorgehen:**
-
-```bash
-cp .env.example .env              # DATABASE_URL="file:./prisma/dev.db"
-ddev exec npm install             # postinstall erzeugt den Client
-ddev exec npm run db:migrate      # legt prisma/dev.db an und spielt Migrationen ein
-```
+Gesamtablauf mit `.env`, Client und Datenbank: siehe [setup.md](setup.md).
 
 **Hinweise:**
 
