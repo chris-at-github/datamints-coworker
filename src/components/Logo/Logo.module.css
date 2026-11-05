@@ -1,0 +1,28 @@
+/* Component styles lose against unlayered module CSS, see docs/guides/css.md. */
+@layer components {
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-40);
+    color: var(--color-neutral-70);
+
+    /* A heading passed as text brings its own margins. */
+    > :not(.logo__mark) {
+      margin: 0;
+    }
+  }
+
+  /* Square with the height of the buttons, like the favicon. */
+  .logo__mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 41px;
+    aspect-ratio: 1;
+    border-radius: var(--border-radius-default);
+    background: var(--color-neutral-20);
+    color: var(--color-neutral-60);
+
+    --icon-size: 24px;
+  }
+}

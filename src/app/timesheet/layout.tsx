@@ -1,5 +1,7 @@
+import { ClockIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { connection } from "next/server";
+import { Logo } from "@/components/Logo/Logo";
 import { readTicketUrlTemplates } from "@/lib/odoo";
 import { TicketLinksProvider } from "@/modules/Timesheet/TicketLinks";
 
@@ -14,7 +16,11 @@ export default async function TimesheetLayout({ children }: LayoutProps<"/timesh
 
   return (
     <main className="page__main">
-      <h1>Timesheet</h1>
+      <header className="page__header">
+        <Logo icon={ClockIcon}>
+          <h1 className="display display--layout-1">Timesheet</h1>
+        </Logo>
+      </header>
       <TicketLinksProvider templates={readTicketUrlTemplates()}>{children}</TicketLinksProvider>
     </main>
   );

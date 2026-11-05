@@ -15,4 +15,9 @@
     margin: 0 auto;
     padding: var(--page-spacing-y) var(--page-spacing-x);
   }
+
+  /* Header row of a tool, e.g. its logo, above the content of the page. */
+  .page__header {
+    margin-bottom: var(--spacing-60);
+  }
 }
