@@ -80,7 +80,7 @@
 
   &:focus-within {
     outline: 2px solid var(--color-outline);
-    outline-offset: -2px;
+    outline-offset: -1px;
   }
 
   /* Placed after .timesheet-row__field, whose own ring it replaces. */
