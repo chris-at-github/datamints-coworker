@@ -16,8 +16,10 @@ cp .env.example .env              # danach Keys und URLs eintragen
 ddev exec npm install             # postinstall erzeugt den Prisma-Client
 ddev exec npm run db:migrate      # legt prisma/dev.db an und spielt Migrationen ein
 ddev exec npm run db:seed         # optional: Beispieldaten
-ddev exec npm run dev             # → https://datamints-coworker.ddev.site:3000
+ddev exec supervisorctl restart webextradaemons:nextjs   # Dev-Server neu starten
 ```
+
+Danach im Browser: <https://datamints-coworker.ddev.site:3000>
 
 **Hinweise:**
 
@@ -28,6 +30,9 @@ ddev exec npm run dev             # → https://datamints-coworker.ddev.site:300
   [prisma.md](prisma.md#testdaten-einspielen).
 - Vorhandene Daten ziehen nicht mit um. Wer sie braucht, kopiert
   `prisma/dev.db` vom alten Rechner, bevor der Dev-Server startet.
+- Der Dev-Server startet mit `ddev start`. Beim ersten Mal fehlen dabei noch
+  `node_modules/` und Prisma-Client, deshalb am Ende der Neustart, siehe
+  [ddev.md](ddev.md#dev-server-steuern-und-logs-lesen).
 - Linter in PhpStorm einrichten: [lint.md](lint.md#eslint-und-stylelint-in-phpstorm-einrichten).
 
 ## API antwortet mit Status 500 nach Neuinstallation

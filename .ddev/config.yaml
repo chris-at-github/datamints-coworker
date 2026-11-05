@@ -299,3 +299,9 @@ web_extra_exposed_ports:
       container_port: 3000
       http_port: 2999
       https_port: 3000
+# Starts the Next.js dev server with the project; supervisord in the web
+# container restarts it if it crashes. Output: ddev logs.
+web_extra_daemons:
+    - name: nextjs
+      command: npm run dev
+      directory: /var/www/html

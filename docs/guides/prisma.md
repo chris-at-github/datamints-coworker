@@ -62,10 +62,11 @@ ddev exec npm run db:generate
 **Problem:** Nach `db:migrate` oder `db:generate` antworten API-Routen mit 500,
 im Log steht z. B. `Cannot read properties of undefined (reading 'findFirst')`.
 
-**Vorgehen:** Dev-Server mit `Strg+C` beenden und neu starten:
+**Vorgehen:** Den Dev-Server neu starten, siehe
+[ddev.md](ddev.md#dev-server-steuern-und-logs-lesen):
 
 ```bash
-ddev exec npm run dev
+ddev exec supervisorctl restart webextradaemons:nextjs
 ```
 
 **Hinweise:**

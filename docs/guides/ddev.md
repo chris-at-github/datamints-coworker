@@ -8,21 +8,46 @@ Hosts erreichbar sein.
 **Vorgehen:**
 
 ```bash
-ddev start                 # Container starten
+ddev start                 # Container und Next.js-Dev-Server starten
 ddev exec npm install      # Abhängigkeiten installieren (einmalig bzw. nach Änderungen)
-ddev exec npm run dev      # Next.js-Dev-Server im Vordergrund starten
 ```
 
 Danach im Browser: <https://datamints-coworker.ddev.site:3000>
 
 **Hinweise:**
 
-- Der Dev-Server läuft im Vordergrund. Beenden mit `Strg+C`.
-- `ddev stop` hält die Container an, `ddev poweroff` alle Projekte auf einmal.
-- Antwortet die URL mit **502**, läuft der Dev-Server nicht — der Router ist da,
-  aber niemand lauscht auf Port 3000 im Container.
-- `ddev start` nennt die URL mit Port 3000 schon, bevor überhaupt etwas läuft.
-  Der Router steht ab dem Start, die Anwendung erst nach `npm run dev`.
+- Der Dev-Server startet mit dem Projekt: `web_extra_daemons` in
+  `.ddev/config.yaml` lässt `npm run dev` von supervisord im Web-Container
+  ausführen. Stürzt er ab, startet supervisord ihn neu.
+- `ddev stop` hält die Container und damit den Dev-Server an, `ddev poweroff`
+  alle Projekte auf einmal.
+- `ddev start` meldet die URL schon, bevor Next.js bereit ist. Antwortet die URL
+  mit **502**, lauscht (noch) niemand auf Port 3000 im Container — ein paar
+  Sekunden warten oder den Status prüfen (siehe unten).
+
+## Dev-Server steuern und Logs lesen
+
+**Problem:** Der Dev-Server läuft im Hintergrund. Wie sieht man seine Ausgabe,
+und wie startet man nur ihn neu?
+
+**Vorgehen:**
+
+```bash
+ddev logs -f                                            # Ausgabe live verfolgen (Strg+C beendet nur die Anzeige)
+ddev exec supervisorctl status webextradaemons:nextjs   # läuft er?
+ddev exec supervisorctl restart webextradaemons:nextjs  # nur den Dev-Server neu starten
+ddev exec supervisorctl stop webextradaemons:nextjs     # anhalten, z. B. für npm run start
+ddev exec supervisorctl start webextradaemons:nextjs    # wieder starten
+```
+
+**Hinweise:**
+
+- Der Name setzt sich aus der Gruppe `webextradaemons` und dem `name` aus
+  `.ddev/config.yaml` (`nextjs`) zusammen.
+- Ein Neustart nur des Dev-Servers ist schneller als `ddev restart`, das alle
+  Container neu startet.
+- Ein Status `FATAL` heißt: Der Start ist mehrfach gescheitert, z. B. weil
+  `node_modules/` fehlte. Nach der Ursache `restart` ausführen.
 
 ## Befehle im Container ausführen
 
@@ -117,8 +142,10 @@ den Timeout.
 **Vorgehen:**
 
 ```bash
-ddev exec npm run build    # Build erzeugen
-ddev exec npm run start    # Build unter derselben URL servieren
+ddev exec npm run build                                 # Build erzeugen
+ddev exec supervisorctl stop webextradaemons:nextjs     # Dev-Server anhalten (gleicher Port)
+ddev exec npm run start                                 # Build unter derselben URL servieren
+ddev exec supervisorctl start webextradaemons:nextjs    # danach Dev-Server wieder starten
 ```
 
 **Hinweise:**
@@ -128,6 +155,7 @@ ddev exec npm run start    # Build unter derselben URL servieren
 - Ergebnis liegt in `.next/` und ist von Git ausgenommen — der Ordner wird
   schnell einige zehn Megabyte groß.
 - `next start` braucht einen vorhandenen Build und belegt denselben Port 3000.
-  Ein noch laufender Dev-Server muss also vorher beendet werden.
+  Der Dev-Server muss also vorher angehalten werden; `npm run start` läuft im
+  Vordergrund und endet mit `Strg+C`.
 - Ob wirklich der Build ausgeliefert wird, sieht man an der Seitengröße: Der
   Dev-Modus schickt zusätzlich Overlay- und Fast-Refresh-Code mit.
