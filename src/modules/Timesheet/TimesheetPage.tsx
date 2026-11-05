@@ -7,9 +7,11 @@ import {
   applyTransferFields,
   createEmptyEntries,
   getNextSorting,
+  isEntryEmpty,
   roundEntryTime,
   setTicket,
   type Ticket,
+  type TimesheetEntry,
   type TimesheetField,
   type TimesheetNeighbors,
   type TimesheetPageData,
@@ -103,13 +105,26 @@ export function TimesheetPage({ page, neighbors, hasTodayPage, onNew, onNewForDa
     trackSave(saveEntry(page.id, nextEntry));
   }
 
+  // Selected rows without any value are left out silently, they are no mistake.
+  function getSelectedFilledEntries(): TimesheetEntry[] {
+    return entries.filter((entry) => selectedIds.has(entry.id) && !isEntryEmpty(entry));
+  }
+
   // The server reads the entries from the database, so pending saves go first.
   // Rows that were not transferred stay selected for another try.
   async function handleTransfer() {
-    const ids = entries.filter((entry) => selectedIds.has(entry.id)).map((entry) => entry.id);
+    const ids = getSelectedFilledEntries().map((entry) => entry.id);
+
+    setActionMessage("");
+
+    // The route rejects an empty list, and there is nothing to send.
+    if (ids.length === 0) {
+      setSelectedIds(new Set());
+      setActionMessage(summarizeTransfer([]));
+      return;
+    }
 
     setIsTransferring(true);
-    setActionMessage("");
 
     try {
       await waitForSaves();
@@ -136,7 +151,7 @@ export function TimesheetPage({ page, neighbors, hasTodayPage, onNew, onNewForDa
 
     try {
       await waitForSaves();
-      const { message, retryIds } = await reviewRun.run(entries.filter((entry) => selectedIds.has(entry.id)));
+      const { message, retryIds } = await reviewRun.run(getSelectedFilledEntries());
 
       setSelectedIds(new Set(retryIds));
       setActionMessage(message);
