@@ -1,6 +1,6 @@
 .status-icon {
   display: inline-flex;
-  color: var(--font-color-muted);
+  color: var(--color-neutral-50);
 
   &:focus-visible {
     outline: 2px solid var(--color-outline);
