@@ -40,10 +40,10 @@ export function TimesheetRowActions({
         onClose={onInternalBookingTextClose}
       />
       {isEmpty ? (
-        <Button.Icon icon={Trash2Icon} aria-label={deleteLabel} onClick={onDelete} />
+        <Button.Icon icon={Trash2Icon} variant="neutral" aria-label={deleteLabel} onClick={onDelete} />
       ) : (
         <AlertDialog>
-          <AlertDialog.Trigger render={<Button.Icon icon={Trash2Icon} aria-label={deleteLabel} />} />
+          <AlertDialog.Trigger render={<Button.Icon icon={Trash2Icon} variant="neutral" aria-label={deleteLabel} />} />
           <AlertDialog.Popup>
             <AlertDialog.Title>Delete row?</AlertDialog.Title>
             <AlertDialog.Description>This row contains data and will be removed.</AlertDialog.Description>
@@ -54,7 +54,13 @@ export function TimesheetRowActions({
           </AlertDialog.Popup>
         </AlertDialog>
       )}
-      <Button.IconLink href={editHref} icon={ArrowBigRightIcon} aria-label={`Edit row ${rowNumber}`} onClick={onEdit} />
+      <Button.IconLink
+        href={editHref}
+        icon={ArrowBigRightIcon}
+        variant="neutral"
+        aria-label={`Edit row ${rowNumber}`}
+        onClick={onEdit}
+      />
     </Button.Group>
   );
 }

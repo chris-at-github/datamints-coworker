@@ -6,7 +6,7 @@ import { Split } from "./Split";
 
 export type { ButtonProps } from "./Button";
 export type { GroupProps } from "./Group";
-export type { IconButtonProps } from "./IconButton";
+export type { IconButtonProps, IconButtonVariant } from "./IconButton";
 export type { IconLinkProps } from "./IconLink";
 export type { SplitProps } from "./Split";
 

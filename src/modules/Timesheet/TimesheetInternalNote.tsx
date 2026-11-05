@@ -24,7 +24,7 @@ export function TimesheetInternalNote({ rowNumber, value, onChange, onClose }: T
     // the popup does not reliably fire blur.
     <Popover onOpenChange={(open) => !open && onClose()}>
       {/* data-filled lets the row keep the button visible outside hover. */}
-      <Popover.Trigger render={<Button.Icon icon={icon} aria-label={label} data-filled={isFilled || undefined} />} />
+      <Popover.Trigger render={<Button.Icon icon={icon} variant="neutral" aria-label={label} data-filled={isFilled || undefined} />} />
       <Popover.Popup align="end" initialFocus={textareaRef}>
         <div className={styles["timesheet-internal-note__header"]}>
           <Popover.Title>Internal booking text</Popover.Title>

@@ -39,6 +39,24 @@
     padding: var(--spacing-20);
   }
 
+  /* Icon on a transparent background, gray only on hover or focus, e.g. for
+     actions in a table. Same specificity as the rules of .button and placed
+     after them, so these win. */
+  .button--neutral {
+    background: transparent;
+
+    &:hover:not([data-disabled]),
+    &:focus-visible:not([data-disabled]) {
+      background: var(--color-neutral-20);
+    }
+
+    /* Without a background, only a lighter icon marks the state. */
+    &[data-disabled] {
+      background: transparent;
+      color: var(--color-neutral-40);
+    }
+  }
+
   /* Links use the same text color as native buttons instead of the link color. */
   .button--link {
     color: buttontext;
