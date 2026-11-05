@@ -60,7 +60,7 @@ export function TimesheetRow({
   const centeredClassName = mergeClassName(styles["timesheet-row__cell"], styles["timesheet-row__cell--centered"]);
 
   return (
-    <tr>
+    <tr className={styles["timesheet-row"]}>
       <td className={centeredClassName}>
         <Checkbox checked={isSelected} onCheckedChange={onSelectedChange} aria-label={`Select row ${rowNumber}`} />
       </td>

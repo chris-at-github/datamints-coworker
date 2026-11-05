@@ -25,6 +25,18 @@
 /* The actions column shrinks to its content, so the buttons must stay on one line. */
 .timesheet-row__actions {
   flex-wrap: nowrap;
+
+  > li {
+    transition: opacity var(--transition-duration-default);
+  }
+}
+
+/* Actions appear while the row is hovered or a control inside has focus.
+   Opacity instead of visibility keeps them focusable for keyboard users and
+   keeps their space, so the table does not shift. A filled note and a trigger
+   whose popup is open (focus is then in a portal outside the row) stay visible. */
+.timesheet-row:not(:hover, :focus-within) .timesheet-row__actions > li:not(:has([data-filled], [data-popup-open])) {
+  opacity: 0;
 }
 
 .timesheet-row__field {

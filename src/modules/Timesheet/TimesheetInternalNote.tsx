@@ -16,13 +16,15 @@ export type TimesheetInternalNoteProps = {
 export function TimesheetInternalNote({ rowNumber, value, onChange, onClose }: TimesheetInternalNoteProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const label = `Internal booking text, row ${rowNumber}`;
-  const icon = value.trim() === "" ? MessageSquareIcon : MessageSquareCheckIcon;
+  const isFilled = value.trim() !== "";
+  const icon = isFilled ? MessageSquareCheckIcon : MessageSquareIcon;
 
   return (
     // Saving on close instead of on blur: a focused element that is removed with
     // the popup does not reliably fire blur.
     <Popover onOpenChange={(open) => !open && onClose()}>
-      <Popover.Trigger render={<Button.Icon icon={icon} aria-label={label} />} />
+      {/* data-filled lets the row keep the button visible outside hover. */}
+      <Popover.Trigger render={<Button.Icon icon={icon} aria-label={label} data-filled={isFilled || undefined} />} />
       <Popover.Popup align="end" initialFocus={textareaRef}>
         <div className={styles["timesheet-internal-note__header"]}>
           <Popover.Title>Internal booking text</Popover.Title>
