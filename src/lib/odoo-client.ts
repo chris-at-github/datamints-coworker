@@ -1,7 +1,7 @@
 // Server only: client for the Odoo External JSON-2 API,
 // POST <ODOO_URL>/json/2/<model>/<method> with the API key as bearer token.
 
-const USER_AGENT = "datamints-works";
+const USER_AGENT = "datamints-coworker";
 
 // An error answered by Odoo, e.g. missing access rights or an unknown field.
 export class OdooError extends Error {

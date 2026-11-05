@@ -15,7 +15,7 @@ Die Anwendung ruft Claude serverseitig über das offizielle SDK
 2. Unter **Billing** Guthaben aufladen: Die API wird im Voraus bezahlt und ist
    unabhängig von einem Claude.ai-Abo (Pro/Max/Team).
 3. Unter **Settings → API keys** auf **Create key** klicken, einen sprechenden
-   Namen vergeben (z. B. `datamints-works-local`) und den Workspace wählen.
+   Namen vergeben (z. B. `datamints-coworker-local`) und den Workspace wählen.
 4. Den Key (`sk-ant-api…`) sofort kopieren: Er wird nur einmal angezeigt.
 5. In `.env` eintragen und den Dev-Server neu starten:
 
@@ -76,7 +76,7 @@ andere Systeme.
 **Vorgehen:**
 
 ```bash
-curl -k -X POST https://datamints-works.ddev.site:3000/api/timesheet-entries/<entryId>/review
+curl -k -X POST https://datamints-coworker.ddev.site:3000/api/timesheet-entries/<entryId>/review
 ```
 
 **Hinweise:**

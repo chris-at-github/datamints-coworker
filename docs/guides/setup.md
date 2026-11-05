@@ -16,7 +16,7 @@ cp .env.example .env              # danach Keys und URLs eintragen
 ddev exec npm install             # postinstall erzeugt den Prisma-Client
 ddev exec npm run db:migrate      # legt prisma/dev.db an und spielt Migrationen ein
 ddev exec npm run db:seed         # optional: Beispieldaten
-ddev exec npm run dev             # → https://datamints-works.ddev.site:3000
+ddev exec npm run dev             # → https://datamints-coworker.ddev.site:3000
 ```
 
 **Hinweise:**

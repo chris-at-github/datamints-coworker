@@ -1,4 +1,4 @@
-# datamints-works
+# Datamints Co-Worker
 
 Lernprojekt zum Aufbau von Full-Stack-Wissen. Die Arbeit ist bewusst in kleine,
 nachvollziehbare Arbeitspakete geschnitten — der Weg ist hier genauso Ergebnis
@@ -18,7 +18,7 @@ ddev exec npm install      # Abhängigkeiten installieren
 ddev exec npm run dev      # Dev-Server starten
 ```
 
-Danach im Browser: <https://datamints-works.ddev.site:3000>
+Danach im Browser: <https://datamints-coworker.ddev.site:3000>
 
 Mehr dazu — inklusive Produktions-Build und Fehlersuche — in
 [`docs/guides/ddev.md`](docs/guides/ddev.md).

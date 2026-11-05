@@ -1,4 +1,4 @@
-name: datamints-works
+name: datamints-coworker
 type: generic
 docroot: ""
 php_version: "8.4"
@@ -293,7 +293,7 @@ corepack_enable: false
 #hooks:
 
 # Expose the Next.js dev server through the DDEV router as
-# https://datamints-works.ddev.site:3000
+# https://datamints-coworker.ddev.site:3000
 web_extra_exposed_ports:
     - name: nextjs
       container_port: 3000

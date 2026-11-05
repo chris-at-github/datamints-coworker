@@ -13,7 +13,7 @@ und hat dessen Rechte.
 
 1. In Odoo oben rechts Avatar → **Mein Profil** (bzw. Einstellungen) → Reiter
    **Kontosicherheit** → **Neuer API-Schlüssel**; Odoo fragt nach dem Passwort.
-2. Beschreibung eingeben (z. B. „datamints-works lokal“) und Laufzeit wählen,
+2. Beschreibung eingeben (z. B. „datamints-coworker lokal“) und Laufzeit wählen,
    höchstens drei Monate.
 3. Key kopieren, er wird nur einmal angezeigt, und in `.env` eintragen:
 

@@ -13,7 +13,7 @@ ddev exec npm install      # Abhängigkeiten installieren (einmalig bzw. nach Ä
 ddev exec npm run dev      # Next.js-Dev-Server im Vordergrund starten
 ```
 
-Danach im Browser: <https://datamints-works.ddev.site:3000>
+Danach im Browser: <https://datamints-coworker.ddev.site:3000>
 
 **Hinweise:**
 
@@ -68,7 +68,7 @@ Den Hostnamen in `next.config.ts` freigeben:
 
 ```ts
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ['datamints-works.ddev.site'],
+  allowedDevOrigins: ['datamints-coworker.ddev.site'],
 };
 ```
 
@@ -98,7 +98,7 @@ Und den Dev-Server fest an Interface und Port binden (`package.json`):
 ```bash
 curl -sk -i --http1.1 -H "Connection: Upgrade" -H "Upgrade: websocket" \
   -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==" \
-  https://datamints-works.ddev.site:3000/_next/hmr
+  https://datamints-coworker.ddev.site:3000/_next/hmr
 ```
 
 Antwortet der Server mit `101 Switching Protocols` und einer

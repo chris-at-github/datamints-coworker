@@ -36,3 +36,6 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# DDEV: local certificates and router config, generated per machine
+.ddev/traefik/

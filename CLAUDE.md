@@ -38,7 +38,7 @@ Alle Befehle laufen im Container. Die Anwendung liegt im Projekt-Root, daher sin
 
 - Umgebung starten: `ddev start`
 - Install: `ddev exec npm install`
-- Dev-Server: `ddev exec npm run dev` → <https://datamints-works.ddev.site:3000>
+- Dev-Server: `ddev exec npm run dev` → <https://datamints-coworker.ddev.site:3000>
 - Build: `ddev exec npm run build` (Ausgabe in `.next/`)
 - Build servieren: `ddev exec npm run start` (belegt denselben Port 3000)
 - Lint: `ddev exec npm run lint` (ESLint + Stylelint; einzeln `lint:js`, `lint:css`)
