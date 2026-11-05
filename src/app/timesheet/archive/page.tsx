@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { formatDate, subtractDays } from "@/lib/date";
-import { findArchivedPages } from "@/lib/timesheet-repository";
+import { findPageSummarys } from "@/lib/timesheet-repository";
 import { TimesheetArchive } from "@/modules/Timesheet/TimesheetArchive";
 
 // Older archived pages stay reachable by URL, but are not listed.
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default async function TimesheetArchivePage() {
   // Renders on every request, so the list and the date range are current.
   await connection();
-  const pages = await findArchivedPages(formatDate(subtractDays(new Date(), LISTED_DAYS)));
+  const pages = await findPageSummarys(formatDate(subtractDays(new Date(), LISTED_DAYS)));
 
   return <TimesheetArchive pages={pages} days={LISTED_DAYS} />;
 }

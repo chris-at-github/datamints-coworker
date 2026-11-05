@@ -1,7 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import type {
-  ArchivedPage,
+  PageSummary,
   Ticket,
   TicketType,
   TimesheetEntry,
@@ -77,13 +77,13 @@ export async function pageExists(id: string): Promise<boolean> {
 // An archived page gets the neighbours it would have among the other pages.
 async function withNavigation({ createdAt, archivedAt, entries, ...pageValues }: PageRow): Promise<TimesheetPageResult> {
   const page: TimesheetPageData = { ...pageValues, archived: archivedAt !== null, entries: entries.map(toEntry) };
-  const [neighbors, latest] = await Promise.all([
+  const [neighbors, pages] = await Promise.all([
     findNeighbors(page.date, createdAt),
-    prisma.timesheetPage.findFirst({ where: NOT_ARCHIVED, orderBy: LATEST_FIRST, select: { date: true } }),
+    prisma.timesheetPage.findMany({ where: NOT_ARCHIVED, orderBy: LATEST_FIRST, select: { id: true, date: true } }),
   ]);
 
   // Without any other page, the page itself counts as the latest one.
-  return { page, neighbors, latestDate: latest?.date ?? page.date };
+  return { page, neighbors, latestDate: pages[0]?.date ?? page.date, pages };
 }
 
 // Same order as LATEST_FIRST: by date, then by creation time.
@@ -124,7 +124,7 @@ export async function setPageArchived(id: string, archived: boolean): Promise<bo
 }
 
 // Newest first, like the pagination; only pages of sinceDate ("YYYY-MM-DD") or later.
-export function findArchivedPages(sinceDate: string): Promise<ArchivedPage[]> {
+export function findPageSummarys(sinceDate: string): Promise<PageSummary[]> {
   return prisma.timesheetPage.findMany({
     where: { archivedAt: { not: null }, date: { gte: sinceDate } },
     orderBy: LATEST_FIRST,

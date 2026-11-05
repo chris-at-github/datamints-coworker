@@ -81,8 +81,8 @@ export type TimesheetPageData = {
   entries: TimesheetEntry[];
 };
 
-// An entry in the list of archived pages.
-export type ArchivedPage = {
+// A page in a list, e.g. the date dropdown or the archived pages.
+export type PageSummary = {
   id: string;
   date: string;
 };
@@ -98,6 +98,8 @@ export type TimesheetPageResult = {
   neighbors: TimesheetNeighbors;
   // Date of the latest page, to tell whether a page for today exists.
   latestDate: string;
+  // All pages that are not archived, newest first, for the date dropdown.
+  pages: PageSummary[];
 };
 
 const EMPTY_VALUES: TimesheetValues = {

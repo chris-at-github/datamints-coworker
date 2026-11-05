@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/Button";
 import { setPageArchived } from "./api";
-import type { ArchivedPage } from "./entries";
+import type { PageSummary } from "./entries";
 import styles from "./TimesheetArchive.module.css";
 
 export type TimesheetArchiveProps = {
   // Newest first, already limited to the listed days.
-  pages: ArchivedPage[];
+  pages: PageSummary[];
   days: number;
 };
 
@@ -19,7 +19,7 @@ export function TimesheetArchive({ pages: initialPages, days }: TimesheetArchive
   const [pages, setPages] = useState(initialPages);
   const [message, setMessage] = useState("");
 
-  async function handleRestore(page: ArchivedPage) {
+  async function handleRestore(page: PageSummary) {
     setMessage("");
 
     try {

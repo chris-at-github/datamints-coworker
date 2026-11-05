@@ -5,7 +5,11 @@
     display: flex;
     flex-direction: column;
     min-width: 180px;
+
+    /* Long lists scroll; Base UI sets the space left in the viewport. */
+    max-height: min(60vh, var(--available-height));
     padding: var(--spacing-20);
+    overflow-y: auto;
     border: 1px solid var(--color-ruler);
     border-radius: var(--border-radius-default);
     background: var(--color-base-white);
@@ -30,6 +34,12 @@
 
     &[data-highlighted] {
       background: var(--color-background-active);
+    }
+
+    /* The entry of the page that is shown, e.g. in a list of pages. */
+    &[aria-current="page"] {
+      color: var(--font-color-important);
+      font-weight: var(--font-weight-medium);
     }
   }
 }

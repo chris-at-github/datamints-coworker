@@ -13,7 +13,7 @@ type LoadState = { status: "loading" } | { status: "error" } | ({ status: "ready
 async function createFirstPage(): Promise<TimesheetPageResult> {
   const page = await createPage();
 
-  return { page, neighbors: { newerId: null, olderId: null }, latestDate: page.date };
+  return { page, neighbors: { newerId: null, olderId: null }, latestDate: page.date, pages: [{ id: page.id, date: page.date }] };
 }
 
 export type TimesheetProps = {
@@ -124,6 +124,7 @@ export function Timesheet({ pageId }: TimesheetProps) {
       key={state.page.id}
       page={state.page}
       neighbors={state.neighbors}
+      pages={state.pages}
       // Pages are created for today or earlier, so the latest date tells whether today's page exists.
       hasTodayPage={state.latestDate === formatDate(new Date())}
       onNew={handleNew}

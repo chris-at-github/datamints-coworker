@@ -30,7 +30,7 @@ function put<T>(url: string, body: unknown): Promise<T> {
 // Without an id the latest page is loaded; the result is null if there is none yet.
 export async function fetchPage(pageId?: string): Promise<TimesheetPageResult | null> {
   const url = pageId ? `/api/timesheet-pages/${encodeURIComponent(pageId)}` : "/api/timesheet-pages/latest";
-  const result = await request<TimesheetPageResult | { page: null; neighbors: null; latestDate: null }>(url);
+  const result = await request<TimesheetPageResult | { page: null; neighbors: null; latestDate: null; pages: null }>(url);
 
   return result.page ? result : null;
 }

@@ -11,6 +11,7 @@ import {
   isEntryEmpty,
   roundEntryTime,
   setTicket,
+  type PageSummary,
   type Ticket,
   type TimesheetEntry,
   type TimesheetField,
@@ -52,6 +53,8 @@ function summarizeTransfer(results: TransferResult[]): string {
 export type TimesheetPageProps = {
   page: TimesheetPageData;
   neighbors: TimesheetNeighbors;
+  // All non-archived pages, for the date dropdown.
+  pages: PageSummary[];
   // "New" is disabled then, so there is at most one page per day.
   hasTodayPage: boolean;
   onNew: () => void;
@@ -67,6 +70,7 @@ export type TimesheetPageProps = {
 export function TimesheetPage({
   page,
   neighbors,
+  pages,
   hasTodayPage,
   onNew,
   onNewForDate,
@@ -192,11 +196,13 @@ export function TimesheetPage({
     newEntries.forEach((entry) => trackSave(saveEntry(page.id, entry)));
   }
 
-  const pagination = <TimesheetPagination neighbors={neighbors} onNavigate={onNavigate} />;
+  const pagination = (
+    <TimesheetPagination pageId={page.id} date={page.date} pages={pages} neighbors={neighbors} onNavigate={onNavigate} />
+  );
 
   return (
     <section className={styles["timesheet-page"]}>
-      <TimesheetHeader date={page.date} pagination={pagination}>
+      <TimesheetHeader pagination={pagination}>
         <Button disabled={hasTodayPage} onClick={onNew}>
           New
         </Button>

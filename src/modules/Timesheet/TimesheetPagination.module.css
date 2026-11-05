@@ -1,0 +1,31 @@
+.timesheet-pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-30);
+}
+
+/* The date looks like the former heading; the chevron shows it opens a list. */
+.timesheet-pagination__date {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-20);
+
+  /* Same height as the arrow buttons next to it (see .button in Button.module.css). */
+  min-height: 41px;
+  padding: var(--spacing-20) var(--spacing-30);
+  border: none;
+  border-radius: var(--border-radius-small);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover,
+  &[data-popup-open] {
+    background: var(--color-background-active);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-outline);
+    outline-offset: 2px;
+  }
+}

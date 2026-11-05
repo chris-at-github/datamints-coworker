@@ -5,9 +5,3 @@
   justify-content: space-between;
   gap: var(--spacing-50);
 }
-
-.timesheet-header__date {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-50);
-}
