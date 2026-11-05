@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { formatDate } from "@/lib/date";
-import { createPage, fetchPage, findPageIdByDate } from "./api";
+import { createPage, fetchPage, findPageIdByDate, setPageArchived } from "./api";
 import type { TimesheetPageResult } from "./entries";
 import { TimesheetPage } from "./TimesheetPage";
 
@@ -77,6 +77,35 @@ export function Timesheet({ pageId }: TimesheetProps) {
     }
   }
 
+  // Opens the latest page that is left; without any, a page for today is created
+  // like on the very first start. Pushing "/timesheet" would not reload if that
+  // URL is already open.
+  async function handleArchive(archivedPageId: string) {
+    try {
+      await setPageArchived(archivedPageId, true);
+      const latest = await fetchPage();
+
+      router.push(`/timesheet/${latest?.page.id ?? (await createPage()).id}`);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // The page is loaded again, so its button and its neighbours are up to date;
+  // the entries in the table stay as they are, as the page keeps its key.
+  async function handleRestore(restoredPageId: string) {
+    try {
+      await setPageArchived(restoredPageId, false);
+      const result = await fetchPage(restoredPageId);
+
+      if (result) {
+        setState({ status: "ready", ...result });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   // Like "New", every page gets a history entry, so the browser's back button pages back.
   function handleNavigate(targetPageId: string) {
     router.push(`/timesheet/${targetPageId}`);
@@ -100,6 +129,8 @@ export function Timesheet({ pageId }: TimesheetProps) {
       onNew={handleNew}
       onNewForDate={handleNewForDate}
       onNavigate={handleNavigate}
+      onArchive={() => handleArchive(state.page.id)}
+      onRestore={() => handleRestore(state.page.id)}
     />
   );
 }

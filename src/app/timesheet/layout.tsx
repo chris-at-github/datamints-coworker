@@ -3,8 +3,9 @@ import { connection } from "next/server";
 import { readTicketUrlTemplates } from "@/lib/odoo";
 import { TicketLinksProvider } from "@/modules/Timesheet/TicketLinks";
 
+// A template only reaches the next level, so the pages below need their own.
 export const metadata: Metadata = {
-  title: "Timesheet",
+  title: { default: "Timesheet", template: "%s | Datamints Co-Worker" },
 };
 
 export default async function TimesheetLayout({ children }: LayoutProps<"/timesheet">) {

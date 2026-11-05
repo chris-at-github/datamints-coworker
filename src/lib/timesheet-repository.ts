@@ -1,6 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import type {
+  ArchivedPage,
   Ticket,
   TicketType,
   TimesheetEntry,
@@ -12,6 +13,9 @@ import type {
 
 // Highest date first; pages on the same day are told apart by creation time.
 const LATEST_FIRST: Prisma.TimesheetPageOrderByWithRelationInput[] = [{ date: "desc" }, { createdAt: "desc" }];
+
+// Pagination, latest page and "New" only know pages that are not archived.
+const NOT_ARCHIVED = { archivedAt: null } as const;
 
 export const TICKET_SELECT = { id: true, type: true, odooId: true, number: true, title: true } as const;
 
@@ -40,13 +44,14 @@ const PAGE_SELECT = {
   id: true,
   date: true,
   createdAt: true,
+  archivedAt: true,
   entries: { orderBy: { sorting: "asc" }, ...ENTRY_QUERY },
 } as const;
 
 type PageRow = Prisma.TimesheetPageGetPayload<{ select: typeof PAGE_SELECT }>;
 
 export async function findLatestPage(): Promise<TimesheetPageResult | null> {
-  const page = await prisma.timesheetPage.findFirst({ orderBy: LATEST_FIRST, select: PAGE_SELECT });
+  const page = await prisma.timesheetPage.findFirst({ where: NOT_ARCHIVED, orderBy: LATEST_FIRST, select: PAGE_SELECT });
 
   return page && withNavigation(page);
 }
@@ -69,14 +74,15 @@ export async function pageExists(id: string): Promise<boolean> {
 }
 
 // Adds what the header needs besides the page: the neighbours and the latest date.
-async function withNavigation({ createdAt, entries, ...pageValues }: PageRow): Promise<TimesheetPageResult> {
-  const page: TimesheetPageData = { ...pageValues, entries: entries.map(toEntry) };
+// An archived page gets the neighbours it would have among the other pages.
+async function withNavigation({ createdAt, archivedAt, entries, ...pageValues }: PageRow): Promise<TimesheetPageResult> {
+  const page: TimesheetPageData = { ...pageValues, archived: archivedAt !== null, entries: entries.map(toEntry) };
   const [neighbors, latest] = await Promise.all([
     findNeighbors(page.date, createdAt),
-    prisma.timesheetPage.findFirst({ orderBy: LATEST_FIRST, select: { date: true } }),
+    prisma.timesheetPage.findFirst({ where: NOT_ARCHIVED, orderBy: LATEST_FIRST, select: { date: true } }),
   ]);
 
-  // The page itself exists, so there is always a latest page.
+  // Without any other page, the page itself counts as the latest one.
   return { page, neighbors, latestDate: latest?.date ?? page.date };
 }
 
@@ -84,12 +90,12 @@ async function withNavigation({ createdAt, entries, ...pageValues }: PageRow): P
 async function findNeighbors(date: string, createdAt: Date): Promise<TimesheetNeighbors> {
   const [newer, older] = await Promise.all([
     prisma.timesheetPage.findFirst({
-      where: { OR: [{ date: { gt: date } }, { date, createdAt: { gt: createdAt } }] },
+      where: { ...NOT_ARCHIVED, OR: [{ date: { gt: date } }, { date, createdAt: { gt: createdAt } }] },
       orderBy: [{ date: "asc" }, { createdAt: "asc" }],
       select: { id: true },
     }),
     prisma.timesheetPage.findFirst({
-      where: { OR: [{ date: { lt: date } }, { date, createdAt: { lt: createdAt } }] },
+      where: { ...NOT_ARCHIVED, OR: [{ date: { lt: date } }, { date, createdAt: { lt: createdAt } }] },
       orderBy: [{ date: "desc" }, { createdAt: "desc" }],
       select: { id: true },
     }),
@@ -98,13 +104,38 @@ async function findNeighbors(date: string, createdAt: Date): Promise<TimesheetNe
   return { newerId: newer?.id ?? null, olderId: older?.id ?? null };
 }
 
-export function savePage(id: string, date: string): Promise<Omit<TimesheetPageData, "entries">> {
+export function savePage(id: string, date: string): Promise<Pick<TimesheetPageData, "id" | "date">> {
   return prisma.timesheetPage.upsert({
     where: { id },
     create: { id, date },
     update: { date },
     select: { id: true, date: true },
   });
+}
+
+// Archives or restores a page; returns false if the page does not exist.
+export async function setPageArchived(id: string, archived: boolean): Promise<boolean> {
+  const { count } = await prisma.timesheetPage.updateMany({
+    where: { id },
+    data: { archivedAt: archived ? new Date() : null },
+  });
+
+  return count > 0;
+}
+
+// Newest first, like the pagination; only pages of sinceDate ("YYYY-MM-DD") or later.
+export function findArchivedPages(sinceDate: string): Promise<ArchivedPage[]> {
+  return prisma.timesheetPage.findMany({
+    where: { archivedAt: { not: null }, date: { gte: sinceDate } },
+    orderBy: LATEST_FIRST,
+    select: { id: true, date: true },
+  });
+}
+
+export async function findPageDate(id: string): Promise<string | null> {
+  const page = await prisma.timesheetPage.findUnique({ where: { id }, select: { date: true } });
+
+  return page?.date ?? null;
 }
 
 export type TimesheetEntryResult = {

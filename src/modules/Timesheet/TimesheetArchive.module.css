@@ -1,0 +1,47 @@
+.timesheet-archive {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-40);
+}
+
+.timesheet-archive__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-50);
+
+  > h2 {
+    margin: 0;
+  }
+}
+
+.timesheet-archive__hint {
+  margin: 0;
+  color: var(--font-color-muted);
+  font-size: var(--font-size-small);
+}
+
+/* One compact line per page: date, Show, Restore. */
+.timesheet-archive__list {
+  display: grid;
+  grid-template-columns: max-content max-content max-content;
+  gap: var(--spacing-20) var(--spacing-50);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Subgrid lines the columns up across the items; display: contents would
+   drop the list semantics in some browsers. */
+.timesheet-archive__item {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+}
+
+.timesheet-archive__date {
+  padding-block: var(--spacing-20);
+  font-variant-numeric: tabular-nums;
+}

@@ -76,7 +76,15 @@ export type TransferResult = {
 export type TimesheetPageData = {
   id: string;
   date: string;
+  // Archived pages are left out of the pagination but stay reachable by URL.
+  archived: boolean;
   entries: TimesheetEntry[];
+};
+
+// An entry in the list of archived pages.
+export type ArchivedPage = {
+  id: string;
+  date: string;
 };
 
 // Ids of the pages before and after a page; null at the edges.

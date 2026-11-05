@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/Button";
+import { formatDate } from "@/lib/date";
 import { deleteEntry, saveEntry, transferEntries } from "./api";
 import {
   applyTransferFields,
@@ -18,7 +19,9 @@ import {
   type TransferResult,
   updateEntry,
 } from "./entries";
+import { TimesheetArchiveButton } from "./TimesheetArchiveButton";
 import { TimesheetHeader } from "./TimesheetHeader";
+import { TimesheetMoreMenu } from "./TimesheetMoreMenu";
 import { TimesheetNewForDate } from "./TimesheetNewForDate";
 import { TimesheetPagination } from "./TimesheetPagination";
 import { TimesheetTable } from "./TimesheetTable";
@@ -55,11 +58,22 @@ export type TimesheetPageProps = {
   // Opens the page of the date, created if there is none yet.
   onNewForDate: (date: string) => void;
   onNavigate: (pageId: string) => void;
+  onArchive: () => void;
+  onRestore: () => void;
 };
 
 // One page holds the entries of exactly one day; the loaded entries are the
 // starting state, changes are kept here.
-export function TimesheetPage({ page, neighbors, hasTodayPage, onNew, onNewForDate, onNavigate }: TimesheetPageProps) {
+export function TimesheetPage({
+  page,
+  neighbors,
+  hasTodayPage,
+  onNew,
+  onNewForDate,
+  onNavigate,
+  onArchive,
+  onRestore,
+}: TimesheetPageProps) {
   const [entries, setEntries] = useState(page.entries);
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set());
   const [isTransferring, setIsTransferring] = useState(false);
@@ -187,6 +201,14 @@ export function TimesheetPage({ page, neighbors, hasTodayPage, onNew, onNewForDa
           New
         </Button>
         <TimesheetNewForDate onCreate={onNewForDate} />
+        <TimesheetArchiveButton
+          date={page.date}
+          isArchived={page.archived}
+          isToday={page.date === formatDate(new Date())}
+          onArchive={onArchive}
+          onRestore={onRestore}
+        />
+        <TimesheetMoreMenu />
       </TimesheetHeader>
       <TimesheetTable
         pageId={page.id}

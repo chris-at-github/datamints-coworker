@@ -77,6 +77,15 @@ export async function deleteEntry(id: string): Promise<void> {
   }
 }
 
+// Archives or restores a page; the server refuses to archive today's page.
+export async function setPageArchived(id: string, archived: boolean): Promise<void> {
+  await request(`/api/timesheet-pages/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ archived }),
+  });
+}
+
 // Id of the page of a day ("YYYY-MM-DD"), or null if there is none.
 export async function findPageIdByDate(date: string): Promise<string | null> {
   const response = await fetch(`/api/timesheet-pages?date=${encodeURIComponent(date)}`);
@@ -98,6 +107,7 @@ export async function createPage(date = formatDate(new Date())): Promise<Timeshe
   const page: TimesheetPageData = {
     id: crypto.randomUUID(),
     date,
+    archived: false,
     entries: createEmptyEntries(NEW_PAGE_ROW_COUNT, 0),
   };
 

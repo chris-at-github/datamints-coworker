@@ -5,3 +5,12 @@ export function formatDate(date: Date): string {
 
   return `${date.getFullYear()}-${month}-${day}`;
 }
+
+// The day the given number of days before the date, for date ranges.
+export function subtractDays(date: Date, days: number): Date {
+  const result = new Date(date);
+
+  result.setDate(result.getDate() - days);
+
+  return result;
+}
