@@ -1,8 +1,12 @@
 **Umfang: kleine Buchung (bis 30 Minuten)**
 
-Die Buchung umfasst {{duration}}. Kurze Buchungen beschreiben meist eine
-einzelne, klar abgegrenzte Tätigkeit.
+Die Buchung umfasst {{duration}}. Kurze Buchungen wie ein Stand-up müssen
+nicht ausformuliert werden.
 
-- Fasse den Buchungstext in einer knappen Zeile zusammen.
-- Nenne nur die Tätigkeit selbst, ohne Aufzählung von Teilschritten.
-- Bleibt der Text dadurch kürzer als das Original, ist das gewollt.
+- Korrigiere nur Rechtschreibung, Grammatik und Zeichensetzung.
+- Wortwahl, Satzbau und Reihenfolge bleiben so, wie sie geschrieben sind:
+  kein Nominalstil, kein Umformulieren, kein Zusammenfassen und kein
+  Ergänzen.
+- Trenne Tätigkeiten nicht neu mit Semikolon, schreibe keine Abkürzungen aus
+  und streiche keine Füllwörter.
+- Kein Punkt am Ende des Buchungstexts.

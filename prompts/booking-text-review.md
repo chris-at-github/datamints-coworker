@@ -40,6 +40,7 @@ nachvollziehbar beschreiben und die gebuchte Dauer plausibel machen.
 
 ## Umfang nach Dauer
 Richte den Umfang nach der gebuchten Dauer. Die Dauer wird in Minuten angegeben.
+Die folgenden Vorgaben haben Vorrang vor allen übrigen Regeln dieser Anweisung.
 
 {{durationGuidance}}
 
