@@ -51,4 +51,22 @@
     list-style: none;
     padding: 0;
   }
+
+  /* A button and its dropdown as one control: the 1px gap lets the background
+     show through, only the outer corners are rounded. The child selectors are
+     more specific than .button, so they win in the same layer. */
+  .button-split {
+    display: inline-flex;
+    gap: 1px;
+
+    > :not(:last-child) {
+      border-start-end-radius: 0;
+      border-end-end-radius: 0;
+    }
+
+    > :not(:first-child) {
+      border-start-start-radius: 0;
+      border-end-start-radius: 0;
+    }
+  }
 }

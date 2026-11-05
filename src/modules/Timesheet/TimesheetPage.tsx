@@ -203,10 +203,12 @@ export function TimesheetPage({
   return (
     <section className={styles["timesheet-page"]}>
       <TimesheetHeader pagination={pagination}>
-        <Button disabled={hasTodayPage} onClick={onNew}>
-          New
-        </Button>
-        <TimesheetNewForDate onCreate={onNewForDate} />
+        <Button.Split>
+          <Button disabled={hasTodayPage} onClick={onNew}>
+            New
+          </Button>
+          <TimesheetNewForDate onCreate={onNewForDate} />
+        </Button.Split>
         <TimesheetArchiveButton
           date={page.date}
           isArchived={page.archived}
