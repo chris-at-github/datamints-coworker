@@ -54,7 +54,7 @@
   /* Inset ring, so it is not clipped by the neighbouring cells. */
   &:focus-visible {
     outline: 2px solid var(--color-outline);
-    outline-offset: -2px;
+    outline-offset: -1px;
   }
 }
 
