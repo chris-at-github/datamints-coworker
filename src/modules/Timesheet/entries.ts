@@ -60,6 +60,10 @@ export type TimesheetEntry = TimesheetValues & {
 // not transferred, transferred, changed since the transfer, last transfer failed.
 export type TransferStatus = "none" | "transferred" | "changed" | "error";
 
+// The status in the table: the transfer status, and before the transfer whether
+// the AI reviewed the current values.
+export type EntryStatus = "open" | "reviewed" | "transferred" | "changed" | "error";
+
 export type TransferResult = {
   id: string;
   // "skipped": not transferable, nothing stored; "failed": the error is stored on the entry.
@@ -200,6 +204,18 @@ export function getTransferStatus(entry: TimesheetEntry, date: string): Transfer
   }
 
   return entry.transferredValues === getTransferValues(entry, date) ? "transferred" : "changed";
+}
+
+// Error > changed > transferred > AI reviewed > open; an entry changed after its
+// review is open again, as needsReview compares with the current values.
+export function getEntryStatus(entry: TimesheetEntry, date: string): EntryStatus {
+  const transferStatus = getTransferStatus(entry, date);
+
+  if (transferStatus !== "none") {
+    return transferStatus;
+  }
+
+  return needsReview(entry) ? "open" : "reviewed";
 }
 
 // Takes over only the transfer fields of the server's entry, so edits made in

@@ -1,16 +1,22 @@
 "use client";
 
 import { CircleAlertIcon, CircleCheckIcon, CircleDashedIcon, RefreshCwIcon } from "lucide-react";
-import { Icon, type IconComponent } from "@/components/Icon/Icon";
-import { Tooltip } from "@/components/Tooltip";
+import type { IconComponent } from "@/components/Icon/Icon";
 import type { TransferStatus } from "./entries";
-import styles from "./TransferStatusIcon.module.css";
+import { StatusIcon, type StatusTone } from "./StatusIcon";
 
 const STATUS_ICONS: Record<TransferStatus, IconComponent> = {
   none: CircleDashedIcon,
   transferred: CircleCheckIcon,
   changed: RefreshCwIcon,
   error: CircleAlertIcon,
+};
+
+const STATUS_TONES: Record<TransferStatus, StatusTone> = {
+  none: "muted",
+  transferred: "muted",
+  changed: "muted",
+  error: "danger",
 };
 
 const STATUS_LABELS: Record<TransferStatus, string> = {
@@ -30,21 +36,8 @@ export type TransferStatusIconProps = {
   error: string;
 };
 
-// Focusable, so keyboard users get the tooltip as well; screen readers read the label.
 export function TransferStatusIcon({ status, error }: TransferStatusIconProps) {
-  const text = getTransferStatusText(status, error);
-
   return (
-    <Tooltip>
-      <Tooltip.Trigger
-        render={<span tabIndex={0} role="img" />}
-        aria-label={text}
-        className={styles["transfer-status-icon"]}
-        data-status={status}
-      >
-        <Icon icon={STATUS_ICONS[status]} />
-      </Tooltip.Trigger>
-      <Tooltip.Popup>{text}</Tooltip.Popup>
-    </Tooltip>
+    <StatusIcon icon={STATUS_ICONS[status]} text={getTransferStatusText(status, error)} tone={STATUS_TONES[status]} />
   );
 }

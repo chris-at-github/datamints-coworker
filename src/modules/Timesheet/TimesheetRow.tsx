@@ -4,21 +4,21 @@ import { maskTime } from "@/lib/time";
 import { Checkbox } from "@/components/Checkbox/Checkbox";
 import {
   getBookingTextField,
-  getTransferStatus,
+  getEntryStatus,
   isEntryEmpty,
   type Ticket,
   type TimesheetEntry,
   type TimesheetField,
 } from "./entries";
 import { TicketField } from "./TicketField";
-import { TransferStatusIcon } from "./TransferStatusIcon";
+import { EntryStatusIcon } from "./EntryStatusIcon";
 import { TimesheetRowActions } from "./TimesheetRowActions";
 import styles from "./TimesheetRow.module.css";
 
 export type TimesheetRowProps = {
   entry: TimesheetEntry;
   rowNumber: number;
-  // Date of the page, for the transfer status.
+  // Date of the page, for the status.
   date: string;
   isSelected: boolean;
   onSelectedChange: (isSelected: boolean) => void;
@@ -54,6 +54,7 @@ export function TimesheetRow({
     onChange(field, maskTime(value));
   }
 
+  const isEmpty = isEntryEmpty(entry);
   const shortClassName = mergeClassName(styles["timesheet-row__field"], styles["timesheet-row__field--short"]);
   const multilineClassName = mergeClassName(styles["timesheet-row__field"], styles["timesheet-row__field--multiline"]);
 
@@ -108,12 +109,12 @@ export function TimesheetRow({
         />
       </td>
       <td className={centeredClassName}>
-        <TransferStatusIcon status={getTransferStatus(entry, date)} error={entry.transferError} />
+        {!isEmpty && <EntryStatusIcon status={getEntryStatus(entry, date)} error={entry.transferError} />}
       </td>
       <td className={mergeClassName(styles["timesheet-row__cell"], styles["timesheet-row__cell--actions"])}>
         <TimesheetRowActions
           rowNumber={rowNumber}
-          isEmpty={isEntryEmpty(entry)}
+          isEmpty={isEmpty}
           internalBookingText={entry.bookingTextInternal}
           onInternalBookingTextChange={(value) => onChange("bookingTextInternal", value)}
           onInternalBookingTextClose={() => onBlur("bookingTextInternal")}

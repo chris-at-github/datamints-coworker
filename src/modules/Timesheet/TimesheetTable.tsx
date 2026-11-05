@@ -7,7 +7,7 @@ import styles from "./TimesheetTable.module.css";
 
 export type TimesheetTableProps = {
   pageId: string;
-  // Date of the page, for the transfer status.
+  // Date of the page, for the status.
   date: string;
   entries: TimesheetEntry[];
   selectedIds: ReadonlySet<string>;
@@ -76,7 +76,7 @@ export function TimesheetTable({
             Booking text
           </th>
           <th scope="col" className={narrowHeadClassName}>
-            Odoo
+            Status
           </th>
           {/* Row actions; intentionally without a heading. */}
           <th scope="col" className={narrowHeadClassName} />

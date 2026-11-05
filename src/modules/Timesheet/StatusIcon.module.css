@@ -1,4 +1,4 @@
-.transfer-status-icon {
+.status-icon {
   display: inline-flex;
   color: var(--font-color-muted);
 
@@ -7,15 +7,7 @@
     outline-offset: 2px;
   }
 
-  &[data-status="transferred"] {
-    color: oklch(55% 0.15 145deg);
-  }
-
-  &[data-status="changed"] {
-    color: oklch(65% 0.15 70deg);
-  }
-
-  &[data-status="error"] {
+  &[data-tone="danger"] {
     color: oklch(50% 0.2 25deg);
   }
 }
