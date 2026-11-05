@@ -1,4 +1,4 @@
-import { addDuration, completeTime, formatDuration, formatTime, getDuration, parseTime, roundTime } from "@/lib/time";
+import { addDuration, completeTime, formatTime, getDuration, parseTime, roundTime } from "@/lib/time";
 
 // Odoo models: "project" is project.task, "helpdesk" is helpdesk.ticket.
 // The order is the order of the choice in the ticket dialog.
@@ -150,7 +150,8 @@ export type TimesheetTotals = {
   // Earliest start and latest end, "" without any valid time.
   startTime: string;
   endTime: string;
-  // Sum of all durations, so breaks between entries do not count.
+  // Sum of all durations as "HH:MM" like the rows, e.g. "08:45"; breaks between
+  // entries do not count. Above 24 hours it goes on, e.g. "25:30".
   duration: string;
 };
 
@@ -164,7 +165,7 @@ export function getTotals(entries: TimesheetValues[]): TimesheetTotals {
   return {
     startTime: starts.length > 0 ? formatTime(Math.min(...starts)) : "",
     endTime: ends.length > 0 ? formatTime(Math.max(...ends)) : "",
-    duration: formatDuration(minutesOf("duration").reduce((sum, minutes) => sum + minutes, 0)),
+    duration: formatTime(minutesOf("duration").reduce((sum, minutes) => sum + minutes, 0)),
   };
 }
 
