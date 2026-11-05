@@ -6,19 +6,19 @@ import {
   HistoryIcon,
   KeyboardIcon,
   StarIcon,
-  StarOffIcon,
   UserCheckIcon,
 } from "lucide-react";
-import { type KeyboardEvent, useRef, useState } from "react";
+import { type KeyboardEvent, type ReactNode, useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import { Icon, type IconComponent } from "@/components/Icon/Icon";
 import { Tabs } from "@/components/Tabs";
 import type { Ticket } from "@/modules/Timesheet/entries";
 import { ticketSource, type TicketSource } from "./api";
+import { FavoriteButton } from "./FavoriteButton";
 import { GroupPanel } from "./GroupPanel";
 import { NumberPanel } from "./NumberPanel";
 import { TicketListPanel } from "./TicketListPanel";
-import type { TicketRow } from "./tickets";
+import { getRowKey, type TicketRow } from "./tickets";
 import { useLoad } from "./useLoad";
 import styles from "./TicketPicker.module.css";
 
@@ -42,6 +42,9 @@ const NAVIGATION: { group: string; entries: { view: View; label: string; icon: I
   },
   { group: "Direct", entries: [{ view: "number", label: "Enter number", icon: KeyboardIcon }] },
 ];
+
+// A favorite added or removed while the picker is open.
+type FavoriteChange = { row: TicketRow; isFavorite: boolean };
 
 const VIEWS = NAVIGATION.flatMap((group) => group.entries.map((entry) => entry.view));
 
@@ -74,6 +77,17 @@ export function TicketPicker({ ticket, onSelect, source = ticketSource }: Ticket
   // "#" switches to "Enter number" only as the first key after opening.
   const hasTypedRef = useRef(false);
   const favorites = useLoad("favorites", () => source.getFavorites());
+  // Kept locally instead of reloading, so a removed favorite stays in its list
+  // until the picker is opened again and the removal can be undone.
+  const [favoriteChanges, setFavoriteChanges] = useState<Map<string, FavoriteChange>>(() => new Map());
+  const [pendingFavorites, setPendingFavorites] = useState<Set<string>>(() => new Set());
+  const loadedFavorites = new Map((favorites.data ?? []).map((row) => [getRowKey(row), row]));
+  // Favorites added in other lists are appended, like the server orders them.
+  const favoriteRows =
+    favorites.data &&
+    [...favorites.data, ...[...favoriteChanges.values()].map((change) => change.row)].filter(
+      (row, index, rows) => rows.findIndex((other) => getRowKey(other) === getRowKey(row)) === index,
+    );
 
   function changeView(nextView: View) {
     setView(nextView);
@@ -96,8 +110,8 @@ export function TicketPicker({ ticket, onSelect, source = ticketSource }: Ticket
   }
 
   // Stored tickets are taken over without Odoo; rows from Odoo are stored first.
-  async function pick(row: TicketRow, favorite = false) {
-    if (row.ticket && !favorite) {
+  async function pick(row: TicketRow) {
+    if (row.ticket) {
       onSelect(row.ticket);
       return;
     }
@@ -106,7 +120,7 @@ export function TicketPicker({ ticket, onSelect, source = ticketSource }: Ticket
     setError("");
 
     try {
-      onSelect(await source.store(row.type, row.odooId, favorite));
+      onSelect(await source.store(row.type, row.odooId, false));
     } catch (storeError) {
       setError(storeError instanceof Error ? storeError.message : "The ticket could not be taken over.");
     } finally {
@@ -114,17 +128,49 @@ export function TicketPicker({ ticket, onSelect, source = ticketSource }: Ticket
     }
   }
 
-  async function removeFavorite(row: TicketRow) {
-    if (!row.ticket) {
-      return;
-    }
+  function isFavorite(row: TicketRow) {
+    const key = getRowKey(row);
+
+    return favoriteChanges.get(key)?.isFavorite ?? loadedFavorites.has(key);
+  }
+
+  // Rows from Odoo have no stored ticket: adding stores it, removing uses the
+  // stored ticket of the favorite.
+  async function toggleFavorite(row: TicketRow) {
+    const key = getRowKey(row);
+    const favorite = !isFavorite(row);
+    const stored = favoriteChanges.get(key)?.row.ticket ?? loadedFavorites.get(key)?.ticket ?? row.ticket;
+
+    setPendingFavorites((current) => new Set(current).add(key));
+    setError("");
 
     try {
-      await source.setFavorite(row.ticket.id, false);
-      favorites.reload();
+      const ticket = stored
+        ? await source.setFavorite(stored.id, favorite).then(() => stored)
+        : await source.store(row.type, row.odooId, true);
+
+      setFavoriteChanges((current) => new Map(current).set(key, { row: { ...row, ticket }, isFavorite: favorite }));
     } catch (favoriteError) {
-      console.error(favoriteError);
+      setError(favoriteError instanceof Error ? favoriteError.message : "The favorite could not be saved.");
+    } finally {
+      setPendingFavorites((current) => {
+        const next = new Set(current);
+
+        next.delete(key);
+        return next;
+      });
     }
+  }
+
+  function renderFavorite(row: TicketRow) {
+    return (
+      <FavoriteButton
+        row={row}
+        isFavorite={isFavorite(row)}
+        isPending={pendingFavorites.has(getRowKey(row))}
+        onToggle={(toggled) => void toggleFavorite(toggled)}
+      />
+    );
   }
 
   return (
@@ -146,8 +192,8 @@ export function TicketPicker({ ticket, onSelect, source = ticketSource }: Ticket
                   <Tabs.Tab key={entryView} value={entryView} className={styles["ticket-picker__tab"]}>
                     <Icon icon={icon} />
                     {label}
-                    {entryView === "favorites" && favorites.data && (
-                      <span className={styles["ticket-picker__count"]}>{favorites.data.length}</span>
+                    {entryView === "favorites" && favoriteRows && (
+                      <span className={styles["ticket-picker__count"]}>{favoriteRows.filter(isFavorite).length}</span>
                     )}
                   </Tabs.Tab>
                 ))}
@@ -163,45 +209,28 @@ export function TicketPicker({ ticket, onSelect, source = ticketSource }: Ticket
         <Tabs.Panel value="favorites">
           <TicketListPanel
             title="Favorites"
-            hint="Add favorites under “Enter number”."
-            rows={favorites.data}
+            hint="Add favorites with the star in any ticket list."
+            rows={favoriteRows}
             error={favorites.error}
-            emptyText="No favorites yet. Save a ticket as favorite under “Enter number”."
+            emptyText="No favorites yet. Add one with the star in any ticket list."
             onPick={pick}
-            renderAction={(row) => (
-              <Button.Icon
-                icon={StarOffIcon}
-                aria-label={`Remove #${row.number} from favorites`}
-                className={styles["ticket-picker__row-button"]}
-                tabIndex={-1}
-                onClick={(event) => {
-                  // Removes without taking the ticket over.
-                  event.stopPropagation();
-                  void removeFavorite(row);
-                }}
-              />
-            )}
+            renderAction={renderFavorite}
           />
         </Tabs.Panel>
         <Tabs.Panel value="recently-booked">
-          <RecentlyBooked source={source} onPick={pick} />
+          <RecentlyBooked source={source} onPick={pick} renderAction={renderFavorite} />
         </Tabs.Panel>
         <Tabs.Panel value="recently-worked">
-          <RecentlyWorked source={source} onPick={pick} />
+          <RecentlyWorked source={source} onPick={pick} renderAction={renderFavorite} />
         </Tabs.Panel>
         <Tabs.Panel value="helpdesk">
-          <GroupPanel type="helpdesk" source={source} onPick={pick} />
+          <GroupPanel type="helpdesk" source={source} onPick={pick} renderAction={renderFavorite} />
         </Tabs.Panel>
         <Tabs.Panel value="projects">
-          <GroupPanel type="project" source={source} onPick={pick} />
+          <GroupPanel type="project" source={source} onPick={pick} renderAction={renderFavorite} />
         </Tabs.Panel>
         <Tabs.Panel value="number">
-          <NumberPanel
-            source={source}
-            onPick={(row, favorite) => {
-              void pick(row, favorite).then(() => favorite && favorites.reload());
-            }}
-          />
+          <NumberPanel source={source} onPick={pick} renderAction={renderFavorite} />
         </Tabs.Panel>
       </Tabs>
       {/* Announced by screen readers when a ticket is being taken over or fails. */}
@@ -215,9 +244,10 @@ export function TicketPicker({ ticket, onSelect, source = ticketSource }: Ticket
 type ListPanelProps = {
   source: TicketSource;
   onPick: (row: TicketRow) => void;
+  renderAction: (row: TicketRow) => ReactNode;
 };
 
-function RecentlyBooked({ source, onPick }: ListPanelProps) {
+function RecentlyBooked({ source, onPick, renderAction }: ListPanelProps) {
   const rows = useLoad("recently-booked", () => source.getRecentlyBooked());
 
   return (
@@ -227,11 +257,12 @@ function RecentlyBooked({ source, onPick }: ListPanelProps) {
       error={rows.error}
       emptyText="No booked tickets yet."
       onPick={onPick}
+      renderAction={renderAction}
     />
   );
 }
 
-function RecentlyWorked({ source, onPick }: ListPanelProps) {
+function RecentlyWorked({ source, onPick, renderAction }: ListPanelProps) {
   const rows = useLoad("recently-worked", () => source.getRecentlyWorked());
 
   return (
@@ -242,6 +273,7 @@ function RecentlyWorked({ source, onPick }: ListPanelProps) {
       error={rows.error}
       emptyText="No open tickets or tasks are assigned to you."
       onPick={onPick}
+      renderAction={renderAction}
     />
   );
 }

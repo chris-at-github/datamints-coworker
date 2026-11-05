@@ -1,7 +1,7 @@
 "use client";
 
 import { PinIcon, PinOffIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/Button";
 import { ToggleGroup } from "@/components/ToggleGroup";
 import type { TicketType } from "@/modules/Timesheet/entries";
@@ -24,14 +24,23 @@ export type GroupPanelProps = {
   type: TicketType;
   source: TicketSource;
   onPick: (row: TicketRow) => void;
+  // E.g. the favorite star of a ticket row.
+  renderAction?: (row: TicketRow) => ReactNode;
 };
 
 // Two steps: pick a team or project, then one of its open tickets.
-export function GroupPanel({ type, source, onPick }: GroupPanelProps) {
+export function GroupPanel({ type, source, onPick, renderAction }: GroupPanelProps) {
   const [group, setGroup] = useState<TicketGroupRow | null>(null);
 
   return group ? (
-    <GroupTickets type={type} group={group} source={source} onBack={() => setGroup(null)} onPick={onPick} />
+    <GroupTickets
+      type={type}
+      group={group}
+      source={source}
+      onBack={() => setGroup(null)}
+      onPick={onPick}
+      renderAction={renderAction}
+    />
   ) : (
     <GroupChoice type={type} source={source} onChoose={setGroup} />
   );
@@ -168,12 +177,13 @@ type GroupTicketsProps = {
   source: TicketSource;
   onBack: () => void;
   onPick: (row: TicketRow) => void;
+  renderAction?: (row: TicketRow) => ReactNode;
 };
 
 type Scope = "mine" | "all";
 
 // Open tickets of the group with a local filter; the scope changes the Odoo query.
-function GroupTickets({ type, group, source, onBack, onPick }: GroupTicketsProps) {
+function GroupTickets({ type, group, source, onBack, onPick, renderAction }: GroupTicketsProps) {
   const wording = WORDING[type];
   const [scope, setScope] = useState<Scope>("mine");
   const [filter, setFilter] = useState("");
@@ -204,7 +214,7 @@ function GroupTickets({ type, group, source, onBack, onPick }: GroupTicketsProps
         placeholder={type === "helpdesk" ? "Filter tickets" : "Filter tasks"}
         sections={[{ items: rows }]}
         getKey={getRowKey}
-        renderItem={(row) => <TicketRowContent row={row} />}
+        renderItem={(row) => <TicketRowContent row={row} action={renderAction?.(row)} />}
         onPick={onPick}
         status={status}
         emptyText={

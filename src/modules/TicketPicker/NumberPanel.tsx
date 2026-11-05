@@ -1,8 +1,7 @@
 "use client";
 
-import { type KeyboardEvent, useEffect, useState } from "react";
+import { type KeyboardEvent, type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/Button";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
 import { Field } from "@/components/Field";
 import { ToggleGroup } from "@/components/ToggleGroup";
 import { isTicketType, TICKET_TYPES, type TicketType } from "@/modules/Timesheet/entries";
@@ -18,18 +17,19 @@ const TYPE_LABELS: Record<TicketType, string> = { project: "Project task", helpd
 
 export type NumberPanelProps = {
   source: TicketSource;
-  onPick: (row: TicketRow, favorite: boolean) => void;
+  onPick: (row: TicketRow) => void;
+  // E.g. the favorite star of the found ticket.
+  renderAction?: (row: TicketRow) => ReactNode;
 };
 
 type Preview = { type: TicketType; number: string; lookup: TicketLookup | null; error: string };
 
 // Type (project first and preselected) and number with a live preview; only a
-// found ticket can be taken over, by the button or Enter in the number input.
-export function NumberPanel({ source, onPick }: NumberPanelProps) {
+// found ticket can be taken over, by a click on its row or Enter in the number input.
+export function NumberPanel({ source, onPick, renderAction }: NumberPanelProps) {
   const [type, setType] = useState<TicketType>("project");
   const [number, setNumber] = useState("");
   const [preview, setPreview] = useState<Preview | null>(null);
-  const [favorite, setFavorite] = useState(false);
 
   // Debounced; a newer input aborts the older request, so outdated answers are dropped.
   useEffect(() => {
@@ -59,7 +59,7 @@ export function NumberPanel({ source, onPick }: NumberPanelProps) {
 
   function takeOver() {
     if (found) {
-      onPick(found, favorite);
+      onPick(found);
     }
   }
 
@@ -111,9 +111,10 @@ export function NumberPanel({ source, onPick }: NumberPanelProps) {
         {number !== "" && !current && <p>Searching…</p>}
         {current?.error && <p className={styles["ticket-picker__error"]}>{current.error}</p>}
         {found && (
-          <div className={styles["ticket-picker__preview"]}>
+          // A click like on a list row; the keyboard uses Enter in the number input.
+          <div className={styles["ticket-picker__preview"]} onClick={takeOver}>
             <div className={styles["ticket-picker__preview-row"]}>
-              <TicketRowContent row={found} />
+              <TicketRowContent row={found} action={renderAction?.(found)} />
             </div>
             <p className={styles["ticket-picker__muted"]}>{found.context}</p>
           </div>
@@ -133,15 +134,6 @@ export function NumberPanel({ source, onPick }: NumberPanelProps) {
             )}
           </>
         )}
-      </div>
-      <div className={styles["ticket-picker__actions"]}>
-        <Button type="button" disabled={!found} onClick={takeOver}>
-          Take over
-        </Button>
-        <label className={styles["ticket-picker__checkbox"]}>
-          <Checkbox checked={favorite} onCheckedChange={setFavorite} />
-          Save as favorite
-        </label>
       </div>
     </div>
   );

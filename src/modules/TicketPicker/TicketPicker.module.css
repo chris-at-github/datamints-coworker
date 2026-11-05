@@ -110,6 +110,11 @@
   padding: var(--spacing-30);
   border: 1px solid var(--color-ruler);
   border-radius: var(--border-radius-small);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-background-active);
+  }
 }
 
 .ticket-picker__preview-row {
@@ -124,20 +129,6 @@
   align-items: center;
   gap: var(--spacing-20);
   margin: var(--spacing-20) 0 0;
-}
-
-.ticket-picker__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--spacing-50);
-}
-
-.ticket-picker__checkbox {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-30);
-  cursor: pointer;
 }
 
 .ticket-picker__status {

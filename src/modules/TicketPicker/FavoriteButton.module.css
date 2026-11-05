@@ -1,0 +1,11 @@
+/* Small inside a row instead of the square button size. */
+.favorite-button {
+  min-width: 0;
+  min-height: 0;
+  padding: var(--spacing-10);
+  background: transparent;
+}
+
+.favorite-button--active svg {
+  fill: currentcolor;
+}
