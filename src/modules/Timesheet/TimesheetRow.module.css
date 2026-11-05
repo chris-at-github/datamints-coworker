@@ -1,5 +1,8 @@
-/* Borderless fields fill their cells, the cell borders draw the grid. */
+/* Borderless fields fill their cells, the cell borders draw the grid.
+   The height is a minimum, the cell still grows with the row; without it the
+   percentage heights of the fields would not resolve. */
 .timesheet-row__cell {
+  height: 1px;
   padding: 0;
   border: 1px solid var(--color-ruler);
   vertical-align: top;
@@ -60,8 +63,28 @@
   min-width: calc(5ch + 2 * var(--spacing-30));
 }
 
-/* Grows with its content where supported; elsewhere it keeps the height of one row. */
+/* Grows with its content where supported and fills a taller row, keeping its
+   text at the top; elsewhere it keeps the height of one row. */
 .timesheet-row__field--multiline {
+  min-height: 100%;
   field-sizing: content;
   resize: none;
+}
+
+/* Fills the cell around an input, which cannot put its text at the top of a
+   taller box; the ring is drawn here, a click focuses the input natively. */
+.timesheet-row__frame {
+  display: block;
+  height: 100%;
+  cursor: text;
+
+  &:focus-within {
+    outline: 2px solid var(--color-outline);
+    outline-offset: -2px;
+  }
+
+  /* Placed after .timesheet-row__field, whose own ring it replaces. */
+  > .timesheet-row__field:focus-visible {
+    outline: none;
+  }
 }

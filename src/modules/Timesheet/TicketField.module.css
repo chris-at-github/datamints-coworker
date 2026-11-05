@@ -4,8 +4,11 @@
   align-items: stretch;
 }
 
+/* Flex puts the text at the top; a button centers its content otherwise. */
 .ticket-field__trigger {
+  display: flex;
   flex: 1;
+  align-items: flex-start;
   min-width: calc(8ch + 2 * var(--spacing-30));
   min-height: calc(1lh + 2 * var(--spacing-30));
   padding: var(--spacing-30);
@@ -14,9 +17,6 @@
   color: inherit;
   font: inherit;
   text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   cursor: pointer;
 
   /* Inset ring, so it is not clipped by the neighbouring cells. */
@@ -24,6 +24,19 @@
     outline: 2px solid var(--color-outline);
     outline-offset: -2px;
   }
+}
+
+/* The ellipsis needs a block that may shrink below its content. */
+.ticket-field__text {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Fills the cell, so ring and click area span a taller row. */
+.ticket-field--cell {
+  height: 100%;
 }
 
 /* Borderless in the table, the cell borders draw the grid. */
@@ -44,6 +57,7 @@
 
 /* As small as the trigger in the table instead of the square button size. */
 .ticket-field--cell .ticket-field__link {
+  align-items: flex-start;
   min-width: 0;
   min-height: 0;
   padding: var(--spacing-30);

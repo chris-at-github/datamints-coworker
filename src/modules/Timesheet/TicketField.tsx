@@ -47,7 +47,9 @@ export function TicketField({ ticket, onSave, label, variant }: TicketFieldProps
           aria-label={`${label}: ${description}`}
           title={ticket && variant === "cell" ? description : undefined}
         >
-          {variant === "boxed" && ticket ? `${number} – ${ticket.title}` : number}
+          <span className={styles["ticket-field__text"]}>
+            {variant === "boxed" && ticket ? `${number} – ${ticket.title}` : number}
+          </span>
         </Dialog.Trigger>
         {/* The focus starts in the first input of the shown panel. */}
         <Dialog.Popup

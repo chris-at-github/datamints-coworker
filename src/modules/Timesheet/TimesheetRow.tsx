@@ -65,27 +65,32 @@ export function TimesheetRow({
       <td className={centeredClassName}>
         <Checkbox checked={isSelected} onCheckedChange={onSelectedChange} aria-label={`Select row ${rowNumber}`} />
       </td>
+      {/* The label fills the cell, so a click anywhere focuses the input. */}
       <td className={styles["timesheet-row__cell"]}>
-        <input
-          className={shortClassName}
-          type="text"
-          placeholder="HH:MM"
-          value={entry.startTime}
-          onChange={(event) => handleTimeChange("startTime", event.target.value)}
-          onBlur={() => onBlur("startTime")}
-          aria-label={`Start time, row ${rowNumber}`}
-        />
+        <label className={styles["timesheet-row__frame"]}>
+          <input
+            className={shortClassName}
+            type="text"
+            placeholder="HH:MM"
+            value={entry.startTime}
+            onChange={(event) => handleTimeChange("startTime", event.target.value)}
+            onBlur={() => onBlur("startTime")}
+            aria-label={`Start time, row ${rowNumber}`}
+          />
+        </label>
       </td>
       <td className={styles["timesheet-row__cell"]}>
-        <input
-          className={shortClassName}
-          type="text"
-          placeholder="HH:MM"
-          value={entry.endTime}
-          onChange={(event) => handleTimeChange("endTime", event.target.value)}
-          onBlur={() => onBlur("endTime")}
-          aria-label={`End time, row ${rowNumber}`}
-        />
+        <label className={styles["timesheet-row__frame"]}>
+          <input
+            className={shortClassName}
+            type="text"
+            placeholder="HH:MM"
+            value={entry.endTime}
+            onChange={(event) => handleTimeChange("endTime", event.target.value)}
+            onBlur={() => onBlur("endTime")}
+            aria-label={`End time, row ${rowNumber}`}
+          />
+        </label>
       </td>
       {/* Computed from start and end time; not editable in the table for now. */}
       <td className={mergeClassName(styles["timesheet-row__cell"], styles["timesheet-row__cell--text"])}>
