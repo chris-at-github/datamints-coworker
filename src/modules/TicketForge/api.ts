@@ -1,4 +1,11 @@
+import type { TicketGroupRow } from "@/modules/TicketPicker/tickets";
 import type { Requirement, RequirementChanges } from "./requirements";
+
+// Mirrors the server types of src/lib/requirement-transfer.ts, which the browser cannot import.
+export type TransferField = "description" | "internalDescription";
+export type FieldState = "empty" | "unchanged" | "changed";
+export type FieldDecision = "replace" | "append" | "skip";
+export type TransferCheck = Record<TransferField, FieldState>;
 
 // Throws with the server's message if it sent one, e.g. a missing setting.
 async function request<T>(url: string, init: RequestInit): Promise<T> {
@@ -43,4 +50,31 @@ export function prepareRequirement(id: string, instruction = ""): Promise<Requir
 // Restores the version before the last AI run.
 export function undoPreparation(id: string): Promise<Requirement> {
   return requestRequirement(requirementUrl(id, "/undo"), { method: "POST" });
+}
+
+// A team/project for a new ticket, an existing ticket by its stored id, or null to clear.
+export function setTransferTarget(
+  id: string,
+  target: { group: Omit<TicketGroupRow, "pinned"> } | { ticketId: string } | null,
+): Promise<Requirement> {
+  return requestRequirement(requirementUrl(id, "/target"), { method: "PUT", body: JSON.stringify(target ?? {}) });
+}
+
+export async function checkTransfer(id: string): Promise<TransferCheck> {
+  const { check } = await request<{ check: TransferCheck }>(requirementUrl(id, "/transfer/check"), { method: "POST" });
+
+  return check;
+}
+
+export function transferRequirement(
+  id: string,
+  includeOriginal: boolean,
+  decisions: Partial<Record<TransferField, FieldDecision>>,
+): Promise<{ requirement: Requirement; skipped: TransferField[] }> {
+  return request(requirementUrl(id, "/transfer"), { method: "POST", body: JSON.stringify({ includeOriginal, decisions }) });
+}
+
+// Removes the link to the Odoo ticket; nothing changes in Odoo.
+export function unlinkTicket(id: string): Promise<Requirement> {
+  return requestRequirement(requirementUrl(id, "/unlink"), { method: "POST" });
 }

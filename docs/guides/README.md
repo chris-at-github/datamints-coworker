@@ -15,7 +15,7 @@ bewusst kurz gehalten und zum Nachschlagen gedacht, nicht zum Durchlesen.
 | Prisma | [prisma.md](prisma.md) | Migrationen (auch mit Datenverlust), Dev-Server-Neustart, Client erzeugen, Testdaten, Datenbank zurücksetzen und ansehen |
 | Linting | [lint.md](lint.md) | ESLint und Stylelint ausführen, Befunde beheben, `.editorconfig`, PhpStorm-Einrichtung |
 | Claude API | [claude-api.md](claude-api.md) | API-Key erstellen, Konfiguration in `.env`, Template und Platzhalter, Prüfung per `curl`, Ticket Forge aufbereiten |
-| Odoo | [odoo.md](odoo.md) | API-Key einrichten und erneuern, Verbindung prüfen, Sprache der Abfragen, Daten des Ticket-Pickers, gelöschte Zeitbuchung, URL-Vorlagen für Ticket-Links |
+| Odoo | [odoo.md](odoo.md) | API-Key einrichten und erneuern, Verbindung prüfen, Sprache der Abfragen, Daten des Ticket-Pickers, gelöschte Zeitbuchung, URL-Vorlagen für Ticket-Links, Ticket Forge übertragen |
 
 ## Aufbau
 

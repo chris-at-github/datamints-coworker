@@ -46,14 +46,15 @@ export function GroupPanel({ type, source, onPick, renderAction }: GroupPanelPro
   );
 }
 
-type GroupChoiceProps = {
+export type GroupChoiceProps = {
   type: TicketType;
   source: TicketSource;
   onChoose: (group: TicketGroupRow) => void;
 };
 
 // Without a query only the pinned and recently used groups; from two characters a search in Odoo.
-function GroupChoice({ type, source, onChoose }: GroupChoiceProps) {
+// Also used on its own, e.g. to choose the team or project of a new ticket.
+export function GroupChoice({ type, source, onChoose }: GroupChoiceProps) {
   const wording = WORDING[type];
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState<{ query: string; result: TicketGroupSearch | null; error: string } | null>(null);

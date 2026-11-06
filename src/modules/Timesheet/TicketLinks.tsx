@@ -23,3 +23,11 @@ export function useTicketUrl(ticket: Pick<Ticket, "type" | "odooId"> | null): st
 
   return ticket && template ? template.replaceAll("{id}", String(ticket.odooId)) : null;
 }
+
+// The Odoo URL of a helpdesk team or project; null without a group or a template.
+export function useGroupUrl(group: { type: Ticket["type"]; odooId: number } | null): string | null {
+  const templates = useContext(TicketLinksContext);
+  const template = group ? templates[`${group.type}-group`] : undefined;
+
+  return group && template ? template.replaceAll("{id}", String(group.odooId)) : null;
+}

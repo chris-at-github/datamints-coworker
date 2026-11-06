@@ -49,6 +49,36 @@
     }
   }
 
+  /* Horizontal tabs: a gray line across the full width, the active tab
+     underlined on top of it. Placed after .tabs__tab and more specific, so
+     these rules win; vertical tabs keep the look above. */
+  .tabs__list[data-orientation="horizontal"] {
+    gap: var(--spacing-50);
+    border-bottom: 1px solid var(--color-ruler);
+
+    > .tabs__tab {
+      /* The underline covers the gray line instead of sitting below it. */
+      margin-bottom: -1px;
+      padding: var(--spacing-30) var(--spacing-10);
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      color: var(--font-color-muted);
+
+      &:hover:not([data-active]) {
+        background: transparent;
+        color: var(--font-color-important);
+      }
+
+      /* Same weight as the other tabs, so the tabs do not shift on a switch. */
+      &[data-active] {
+        border-bottom-color: var(--font-color-important);
+        background: transparent;
+        color: var(--font-color-important);
+        font-weight: var(--font-weight-default);
+      }
+    }
+  }
+
   .tabs__panel {
     flex: 1;
     min-width: 0;

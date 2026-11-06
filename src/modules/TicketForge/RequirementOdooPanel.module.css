@@ -1,0 +1,171 @@
+/* Same frame as the AI panel. */
+.odoo-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-40);
+  padding: var(--spacing-50);
+  border: 1px solid var(--color-ruler);
+  border-radius: var(--border-radius-default);
+}
+
+.odoo-panel__title {
+  margin: 0;
+  color: var(--font-color-important);
+  font-size: var(--font-size-default);
+  font-weight: var(--font-weight-medium);
+}
+
+.odoo-panel__tabs {
+  gap: var(--spacing-40);
+}
+
+.odoo-panel__tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-20);
+}
+
+.odoo-panel__label {
+  color: var(--font-color-important);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+}
+
+/* The field takes the free width, the link icon sits on its right. */
+.odoo-panel__group {
+  display: flex;
+  align-items: stretch;
+  gap: var(--spacing-30);
+}
+
+/* Same look as the boxed ticket field of the other tab (TicketField.module.css). */
+.odoo-panel__group-field {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  min-height: calc(1lh + 2 * var(--spacing-30));
+  padding: var(--spacing-30);
+  border: 1px solid var(--color-ruler);
+  border-radius: var(--border-radius-small);
+  background: var(--color-base-white);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-outline);
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.odoo-panel__group-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.odoo-panel__check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-30);
+  align-self: flex-start;
+  cursor: pointer;
+}
+
+.odoo-panel__target {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-40);
+  margin: 0;
+}
+
+.odoo-panel__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-20);
+}
+
+.odoo-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-30);
+}
+
+.odoo-panel__state,
+.odoo-panel__hint {
+  margin: 0;
+  color: var(--font-color-muted);
+  font-size: var(--font-size-small);
+}
+
+.odoo-panel__message {
+  min-height: 1lh;
+  margin: 0;
+  font-size: var(--font-size-small);
+}
+
+/* As wide as the dialog of the ticket picker. */
+.odoo-panel__group-dialog {
+  width: min(820px, 100% - 2 * var(--page-spacing-x));
+}
+
+/* Space between the tabs and the search of the chosen tab. */
+.odoo-panel__group-tabs {
+  gap: var(--spacing-50);
+}
+
+.decision-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-50);
+  width: min(560px, 100%);
+}
+
+.decision-dialog__hint {
+  margin: 0;
+  color: var(--font-color-muted);
+  font-size: var(--font-size-small);
+}
+
+/* One row per field, separated by a line. */
+.decision-dialog__fields {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--color-ruler);
+}
+
+/* Name on the left, options on the right, the hint below both. */
+.decision-dialog__field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--spacing-20) var(--spacing-50);
+  padding-block: var(--spacing-40);
+  border-bottom: 1px solid var(--color-ruler);
+
+  > .decision-dialog__hint {
+    grid-column: 1 / -1;
+  }
+}
+
+.decision-dialog__name {
+  margin: 0;
+  color: var(--font-color-important);
+  font-size: var(--font-size-default);
+  font-weight: var(--font-weight-medium);
+}
+
+/* The main action on the right, as usual for dialogs. */
+.decision-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-30);
+}

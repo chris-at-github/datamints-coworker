@@ -9,6 +9,7 @@ import { Menu } from "@/components/Menu";
 import { usePendingSaves } from "@/lib/use-pending-saves";
 import { prepareRequirement, undoPreparation, updateRequirement } from "./api";
 import { RequirementAiPanel } from "./RequirementAiPanel";
+import { RequirementOdooPanel } from "./RequirementOdooPanel";
 import { formatDateTime, getDisplayTitle, type Requirement, STATUS_LABELS, UNTITLED } from "./requirements";
 import styles from "./RequirementForm.module.css";
 
@@ -39,7 +40,6 @@ export function RequirementEditor({ requirement: initialRequirement, autoPrepare
   const savedRef = useRef(initialRequirement);
   const [message, setMessage] = useState("");
   const [aiRun, setAiRun] = useState<AiRun>(null);
-  const [isOriginalShown, setIsOriginalShown] = useState(false);
   const hasAutoPreparedRef = useRef(false);
   const { trackSave, waitForSaves, navigateAfterSaves } = usePendingSaves();
 
@@ -129,6 +129,13 @@ export function RequirementEditor({ requirement: initialRequirement, autoPrepare
     }
   }, [autoPrepare]);
 
+  // Answers of the Odoo panel replace the whole requirement, like an AI run.
+  function handleOdooChange(changed: Requirement, changeMessage = "") {
+    savedRef.current = changed;
+    setRequirement(changed);
+    setMessage(changeMessage);
+  }
+
   const isRunning = aiRun !== null;
 
   return (
@@ -197,20 +204,12 @@ export function RequirementEditor({ requirement: initialRequirement, autoPrepare
           onBlur={() => handleBlur("internalDescription")}
         />
       </Field>
-      <div className={styles["requirement-form__original"]}>
-        <Button
-          aria-expanded={isOriginalShown}
-          aria-controls="requirement-raw-text"
-          onClick={() => setIsOriginalShown((shown) => !shown)}
-        >
-          {isOriginalShown ? "Hide original" : "Show original"}
-        </Button>
-        {isOriginalShown && (
-          <pre id="requirement-raw-text" className={styles["requirement-form__raw-text"]}>
-            {requirement.rawText}
-          </pre>
-        )}
-      </div>
+      <RequirementOdooPanel
+        requirement={requirement}
+        isBusy={isRunning}
+        onChange={handleOdooChange}
+        waitForSaves={waitForSaves}
+      />
     </div>
   );
 }

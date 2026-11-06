@@ -62,6 +62,9 @@ Given per work package in its own plan.
   calculation and very technical implementation details. Claude does not move
   or remove items of the current state unless an instruction asks for it; it
   names misplaced items in its feedback instead.
+- **Checklists stay** under "Anforderungen" and "Zu prüfen" (asked again after
+  package 4): they show progress during implementation and acceptance; goal,
+  hints and open questions stay plain text or lists.
 - **No Definition of Done section:** the requirement checklist is the
   acceptance criterion; a general DoD belongs to the team process.
 - **Original in the ticket:** the transfer appends the raw text to the

@@ -123,10 +123,15 @@ in Odoo zeigen.
 ```bash
 ODOO_HELPDESK_TICKET_URL="https://odoo.datamints.com/odoo/helpdesk.ticket/{id}"
 ODOO_PROJECT_TASK_URL="https://odoo.datamints.com/odoo/project.task/{id}"
+# Team bzw. Projekt, das in Ticket Forge als Ziel gewählt ist
+ODOO_HELPDESK_TEAM_URL="https://odoo.datamints.com/odoo/helpdesk/{id}/tickets"
+ODOO_PROJECT_URL="https://odoo.datamints.com/odoo/action-393/{id}"
 ```
 
 **Hinweise:**
 
+- `action-393` ist die Aktion „Aufgaben eines Projekts“ dieser Odoo-Instanz;
+  auf einer anderen Instanz kann die Nummer abweichen.
 - `{id}` ist die Odoo-Datensatz-ID, nicht die in Odoo angezeigte Ticketnummer
   (z. B. Datensatz 4830 = Ticket 4833).
 - Modell-URLs (`/odoo/<modell>/<id>`) statt Menü-URLs
@@ -134,3 +139,48 @@ ODOO_PROJECT_TASK_URL="https://odoo.datamints.com/odoo/project.task/{id}"
   kein Projekt.
 - Fehlt eine URL, zeigt das Feld für diese Ticketart kein Icon.
 - Nach einer Änderung an `.env` den Dev-Server neu starten.
+
+## Ticket Forge: Anforderungen übertragen
+
+**Problem:** Eine Anforderung soll als neues Ticket, als neue Aufgabe oder in ein
+bestehendes Ticket nach Odoo.
+
+**Vorgehen:** Auf der Seite der Anforderung im Bereich **Odoo** ein Team oder
+Projekt (neues Ticket) oder ein bestehendes Ticket wählen, dann **Transfer to
+Odoo**. Für neue Helpdesk-Tickets in `.env`:
+
+```bash
+ODOO_HELPDESK_STAGE="Neu ohne Mail"
+```
+
+**Hinweise:**
+
+- Neue Helpdesk-Tickets entstehen in der Phase aus `ODOO_HELPDESK_STAGE`. Die
+  Standardphase „🆕 Neu / Warte auf Support“ verschickt die Mail „Ticket
+  eingegangen“ an den Kunden. Hat das Team die Phase nicht oder hängt an ihr
+  eine Mailvorlage, bricht die Übertragung ab, ohne ein Ticket anzulegen.
+- Kunde, Projekt und Auftragsposition setzt Odoo wie beim Anlegen im Formular
+  (`default_get` und `onchange`). Bleibt die Auftragsposition leer, kommt sie aus
+  dem Projekt.
+- Neue Aufgaben übernehmen die Follower des Projekts, auch Kontakte des
+  Kunden. Die Meldung „Aufgabe erstellt“ geht nur an Follower, die diesen
+  Subtyp abonniert haben.
+- Markdown wird zu Odoo-HTML: `- [ ]` und `- [x]` werden zu abhakbaren
+  Checklisten (`<ul class="o_checklist">`), in Odoo weiter bearbeitbar.
+- „Include original“ hängt den Rohtext unter „Anforderung durch Kunden“ an die
+  Beschreibung. Sie ist im Kundenportal sichtbar: bei Protokollen mit internen
+  Bemerkungen den Haken entfernen.
+- Der Titel eines bestehenden Tickets bleibt unverändert.
+- Nach jeder Übertragung merkt sich die App je Feld einen Hash des Inhalts, wie
+  Odoo ihn gespeichert hat. Wurde ein Feld seither in Odoo geändert (oder hat ein
+  bestehendes Ticket schon Inhalt), fragt der Dialog: ersetzen, anhängen oder
+  überspringen. Übersprungene Felder fragen beim nächsten Mal wieder.
+- **Unlink Odoo ticket** löst nur die Verknüpfung; in Odoo wird nichts gelöscht.
+- Ohne Oberfläche (z. B. zum Testen):
+
+```bash
+B=https://datamints-coworker.ddev.site:3000/api/requirements/<id>
+curl -k -X PUT -d '{"group":{"type":"helpdesk","odooId":100,"name":"Ausbildungskompass"}}' $B/target
+curl -k -X POST $B/transfer/check
+curl -k -X POST -d '{"includeOriginal":true,"decisions":{"description":"append"}}' $B/transfer
+```

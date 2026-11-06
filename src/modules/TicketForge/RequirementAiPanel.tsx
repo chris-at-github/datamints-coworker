@@ -23,9 +23,11 @@ export type RequirementAiPanelProps = {
   onUndo: () => Promise<boolean>;
 };
 
-// Prepare, refine with an instruction and undo, with Claude's feedback for the author.
+// Prepare, refine with an instruction and undo, with Claude's feedback for the
+// author; the original text can be shown next to it for comparison.
 export function RequirementAiPanel({ requirement, run, onPrepare, onRefine, onUndo }: RequirementAiPanelProps) {
   const [instruction, setInstruction] = useState("");
+  const [isOriginalShown, setIsOriginalShown] = useState(false);
   const isRunning = run !== null;
   const isPrepared = requirement.status !== "draft";
 
@@ -45,14 +47,27 @@ export function RequirementAiPanel({ requirement, run, onPrepare, onRefine, onUn
             Undo AI change
           </Button>
         )}
+        <Button
+          aria-expanded={isOriginalShown}
+          aria-controls="requirement-raw-text"
+          onClick={() => setIsOriginalShown((shown) => !shown)}
+        >
+          {isOriginalShown ? "Hide original" : "Show original"}
+        </Button>
       </div>
+      {isOriginalShown && (
+        <div id="requirement-raw-text" className={styles["ai-panel__box"]}>
+          <h4 className={styles["ai-panel__box-title"]}>Original</h4>
+          <p className={styles["ai-panel__box-text"]}>{requirement.rawText}</p>
+        </div>
+      )}
       <p className={styles["ai-panel__status"]} role="status">
         {run && RUN_LABELS[run]}
       </p>
       {requirement.aiFeedback && (
-        <div className={styles["ai-panel__feedback"]}>
-          <h4 className={styles["ai-panel__feedback-title"]}>Feedback from Claude</h4>
-          <p className={styles["ai-panel__feedback-text"]}>{requirement.aiFeedback}</p>
+        <div className={styles["ai-panel__box"]}>
+          <h4 className={styles["ai-panel__box-title"]}>Feedback from Claude</h4>
+          <p className={styles["ai-panel__box-text"]}>{requirement.aiFeedback}</p>
         </div>
       )}
       <Field>

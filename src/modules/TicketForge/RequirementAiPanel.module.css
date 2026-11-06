@@ -36,22 +36,24 @@
   font-size: var(--font-size-small);
 }
 
-.ai-panel__feedback {
+/* Gray box for Claude's feedback and the original text. */
+.ai-panel__box {
   padding: var(--spacing-40);
   border-radius: var(--border-radius-small);
   background: var(--color-neutral-10);
   font-size: var(--font-size-small);
 }
 
-.ai-panel__feedback-title {
+.ai-panel__box-title {
   margin: 0 0 var(--spacing-20);
   color: var(--font-color-important);
   font-size: inherit;
   font-weight: var(--font-weight-medium);
 }
 
-/* Claude answers with line breaks and list markers as plain text. */
-.ai-panel__feedback-text {
+/* Line breaks and list markers are plain text in both; long lines wrap. */
+.ai-panel__box-text {
   margin: 0;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }

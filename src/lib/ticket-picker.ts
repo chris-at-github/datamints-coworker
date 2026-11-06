@@ -264,6 +264,15 @@ export async function setGroupPinned(group: Omit<TicketGroupRow, "pinned">, pinn
   await prisma.ticketGroup.update({ where: { id }, data: { pinnedAt: pinned ? new Date() : null } });
 }
 
+// Stores a group chosen as target, e.g. in Ticket Forge, as recently used; returns its id.
+export async function storeUsedGroup(group: Omit<TicketGroupRow, "pinned">): Promise<string> {
+  const { id } = await upsertGroup(group.type, group);
+
+  await prisma.ticketGroup.update({ where: { id }, data: { lastUsedAt: new Date() } });
+
+  return id;
+}
+
 // Opens a group: reads its current name and customer from Odoo, stores it as
 // recently used and answers with its open tickets.
 export async function openGroup(
