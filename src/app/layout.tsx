@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/styles/application.css";
+import { Sidebar } from "@/modules/Sidebar/Sidebar";
 
 // No weight given, so next/font serves Inter as a variable font.
 const inter = Inter({
@@ -18,7 +19,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <div className="page">{children}</div>
+        <div className="page">
+          <Sidebar />
+          {children}
+        </div>
       </body>
     </html>
   );

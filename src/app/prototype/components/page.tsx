@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus, Trash2 } from "lucide-react";
+import { HousesIcon, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card/Card";
 import { Ruler } from "@/components/Ruler/Ruler";
@@ -37,7 +37,7 @@ export default function ComponentsPage() {
       <section className={styles.prototype__section}>
         <h2 className="display display--layout-2">Card</h2>
 
-        <Card />
+        <Card icon={HousesIcon} />
       </section>
 
       <Ruler />

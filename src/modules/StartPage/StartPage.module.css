@@ -1,0 +1,41 @@
+.start-page__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 360px));
+  gap: var(--spacing-60);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.start-page__link {
+  display: block;
+  height: 100%;
+  border-radius: var(--border-radius-default);
+  color: inherit;
+  text-decoration: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-outline);
+    outline-offset: 2px;
+  }
+}
+
+.start-page__card {
+  height: 100%;
+  transition: border-color var(--transition-duration-default);
+
+  .start-page__link:hover & {
+    border-color: var(--color-ruler-active);
+  }
+}
+
+.start-page__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-20);
+  padding: 0 var(--spacing-50) var(--spacing-50);
+
+  > * {
+    margin: 0;
+  }
+}

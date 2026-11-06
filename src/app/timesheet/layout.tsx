@@ -1,13 +1,13 @@
-import { ClockIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { connection } from "next/server";
-import { Logo } from "@/components/Logo/Logo";
+import { TIMESHEET_AREA } from "@/lib/areas";
 import { readTicketUrlTemplates } from "@/lib/odoo";
+import { AreaHeader } from "@/modules/AreaHeader/AreaHeader";
 import { TicketLinksProvider } from "@/modules/Timesheet/TicketLinks";
 
 // A template only reaches the next level, so the pages below need their own.
 export const metadata: Metadata = {
-  title: { default: "Timesheet", template: "%s | Datamints Co-Worker" },
+  title: { default: TIMESHEET_AREA.name, template: "%s | Datamints Co-Worker" },
 };
 
 export default async function TimesheetLayout({ children }: LayoutProps<"/timesheet">) {
@@ -16,11 +16,7 @@ export default async function TimesheetLayout({ children }: LayoutProps<"/timesh
 
   return (
     <main className="page__main">
-      <header className="page__header">
-        <Logo icon={ClockIcon}>
-          <h1 className="display display--layout-1">Timesheet</h1>
-        </Logo>
-      </header>
+      <AreaHeader area={TIMESHEET_AREA} />
       <TicketLinksProvider templates={readTicketUrlTemplates()}>{children}</TicketLinksProvider>
     </main>
   );

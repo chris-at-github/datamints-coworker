@@ -9,8 +9,10 @@
     min-height: 100dvh;
   }
 
+  /* Takes the space next to the sidebar; min-width lets wide content shrink instead of overflowing. */
   .page__main {
     width: 100%;
+    min-width: 0;
     max-width: var(--page-max-width);
     margin: 0 auto;
     padding: var(--page-spacing-y) var(--page-spacing-x);

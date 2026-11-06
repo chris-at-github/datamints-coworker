@@ -1,0 +1,93 @@
+# Ticket Forge (Overview)
+
+## Context & Goal
+
+A new area of the Co-Worker, **Ticket Forge**, turns new customer requirements
+(meeting notes, email text) into Odoo tickets for internal developers. A
+requirement is created in the app or by Claude Code, prepared by AI with a
+prompt file, edited as Markdown and transferred to a helpdesk ticket or a
+project task, either as a new ticket or into an existing one.
+
+This document collects the decisions for the whole area. Each work package
+gets its own plan in `docs/plans/` with its own branch:
+
+1. **App shell** — sidebar, start page, Ticket Forge route with logo header
+   (`docs/plans/app-shell.md`).
+2. **Manage requirements** — data model, list with manual archive, create from
+   raw text, edit title, description and internal description as Markdown.
+3. **AI preparation** — prompt file, prepare raw text, refine with an extra
+   instruction, own model and effort settings.
+4. **Odoo transfer** — choose team or project and optionally an existing
+   ticket, take over Odoo defaults, Markdown to Odoo HTML, change detection.
+5. **MCP for Claude Code** — MCP route over HTTP with a bearer token.
+
+## Non-Goals
+
+- Splitting one raw text into several requirements (one raw text, one requirement).
+- Any function on the raw text besides showing the original on demand.
+- Claude Desktop (deferred; a remote connector cannot reach the local DDEV site).
+- A public REST API besides MCP; the UI keeps using internal routes.
+- Attachments and images from emails.
+- A rich text editor; Markdown fields are enough.
+- Grouping the sidebar entries (later).
+- A technical concept in the ticket; developers do that themselves.
+
+## Acceptance Criteria
+
+Given per work package in its own plan.
+
+## Open Decisions
+
+### Decided
+
+- **Name and icon:** "Ticket Forge" with the lucide `Hammer` icon.
+- **Raw text:** stored unchanged; the requirement page can show the original
+  on demand, nothing else.
+- **Internal description:** filled by the AI and by the user.
+- **Ticket layout (prompt):** title, goal (1–3 sentences, why), requirements
+  as checklist (each item checkable, replaces separate acceptance criteria),
+  open questions (only if the raw text leaves gaps). Internal description:
+  budget/effort hints, customer mood, contact persons, technical ideas from the
+  notes. No invention, no technical design, size follows the raw text, German.
+- **Markdown is the source:** a deterministic converter writes Odoo HTML; the
+  AI never writes HTML. Checklists become `<ul class="o_checklist"><li>…</li></ul>`,
+  nesting allowed (verified on an existing task in Odoo); checked items get
+  `class="o_checked"` (verify in package 4).
+- **Odoo fields:** `description` and the custom HTML field `internal_description`,
+  both on `helpdesk.ticket` and `project.task`.
+- **Odoo defaults:** the ticket is created with the values Odoo's form
+  computes (`default_get` plus `onchange`). Verified read-only: a project sets
+  customer and sale order line of a task; a helpdesk team sets the project.
+  The sale order line of a helpdesk ticket is not returned by `onchange` but
+  existing tickets carry the one of their project, so it is likely computed on
+  create — verify with a test ticket, otherwise take it from the project.
+  "Created by" is the API key's user automatically. A missing customer is fine.
+- **Change detection on transfer:** after each write the app reads the field
+  back from Odoo and stores a hash of the stored HTML per field (Odoo
+  sanitizes HTML, so the sent HTML would never match). On the next transfer
+  the current Odoo value is hashed again:
+  - same hash or empty field → write without asking;
+  - different hash (changed in Odoo, or an existing ticket linked for the
+    first time with content) → ask per field: replace, append or skip.
+  Rejected: `write_date`, which changes on any field (stage, assignee) and
+  would ask far too often.
+- **AI model:** own settings `TICKET_FORGE_MODEL` / `TICKET_FORGE_EFFORT`,
+  starting with `claude-sonnet-5-5` and `medium`; preparing a requirement is
+  harder than polishing a booking text and runs rarely.
+- **Claude Code:** MCP over HTTP (Streamable HTTP in a Next.js route), secured
+  with a bearer token from `.env`. Claude Code may create, read, update and
+  refine requirements freely.
+- **Start of the area:** `/ticket-forge` shows the list
+  (title, team/project, status, last change) with a primary "New" button.
+  "New" opens a form with only the raw text (and an optional title); saving
+  leads to the requirement page. Reason: requirements go through several steps
+  (create, prepare, edit, transfer) and also arrive from Claude Code, so
+  returning to existing ones is the common case. An empty list shows the empty
+  state with the same button.
+- **Archive:** "Archive" in the more menu of a requirement and as a
+  row action; archived ones leave the list and are restored from an archive
+  page, as in the timesheet (but without the 90-day limit).
+- **Transfer via MCP:** no transfer tool in MCP; Claude Code answers
+  with the link to the requirement, the transfer is a click in the app.
+  Reason: the consent then always happens in the app; a Claude Code permission
+  prompt can be switched to "always allow" and would no longer be a consent.
