@@ -15,6 +15,7 @@ const TEMPLATE_PATH = path.join(process.cwd(), "prompts", "ticket-forge.md");
 const TEMPLATE_INPUT_HEADING = "\n## Rohtext";
 
 const INSTRUCTIONS = `Ticket Forge turns customer requirements (meeting notes, emails) into Odoo tickets for internal developers.
+- Use it when the user asks in German for an "Anforderungsticket", to "eine Anforderung anlegen", "ein Ticket erstellen" or "ein Odoo-Ticket vorbereiten" for a customer requirement.
 - Create a requirement with the raw text; by default the app prepares it with its own AI and rules.
 - To write the ticket yourself, call get_ticket_guidelines first and pass description and internalDescription with prepare: false.
 - Ticket content is German Markdown. The description is visible to the customer; only truly internal information goes into internalDescription.
@@ -77,7 +78,9 @@ export function createTicketForgeMcpServer(): McpServer {
     {
       title: "Create requirement",
       description:
-        "Creates a requirement from a raw text (meeting notes, email). With prepare (default true) the app's AI " +
+        "Creates a requirement (German: Anforderungsticket, Anforderung, Kundenanforderung) in Ticket Forge, " +
+        "to become an Odoo ticket; use it for 'erstelle ein Anforderungsticket', 'lege eine Anforderung an', " +
+        "'erstelle ein Ticket'. Takes a raw text (meeting notes, email). With prepare (default true) the app's AI " +
         "structures it into title, description and internal description, which takes about 10 seconds. With " +
         "prepare false, pass description and internalDescription written by the rules of get_ticket_guidelines.",
       inputSchema: {
