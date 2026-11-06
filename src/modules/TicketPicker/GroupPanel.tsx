@@ -8,7 +8,7 @@ import type { TicketType } from "@/modules/Timesheet/entries";
 import { type TicketSource } from "./api";
 import { PickerList } from "./PickerList";
 import { TicketRowContent } from "./TicketRowContent";
-import { getRowKey, type TicketGroupRow, type TicketGroupSearch, type TicketRow } from "./tickets";
+import { getGroupTitle, getRowKey, type TicketGroupRow, type TicketGroupSearch, type TicketRow } from "./tickets";
 import { useLoad } from "./useLoad";
 import styles from "./TicketPicker.module.css";
 
@@ -139,7 +139,10 @@ function GroupChoice({ type, source, onChoose }: GroupChoiceProps) {
         getKey={(group) => `${group.type}-${group.odooId}`}
         renderItem={(group) => (
           <>
-            <span className={styles["ticket-picker__group-name"]}>{group.name}</span>
+            {/* Long names are cut off; the tooltip shows the full text. */}
+            <span className={styles["ticket-picker__group-name"]} title={getGroupTitle(group)}>
+              {group.name}
+            </span>
             {group.customer && <span className={styles["ticket-picker__muted"]}>{group.customer}</span>}
             <Button.Icon
               icon={group.pinned ? PinOffIcon : PinIcon}
@@ -206,7 +209,9 @@ function GroupTickets({ type, group, source, onBack, onPick, renderAction }: Gro
         </button>
         <span aria-hidden="true">›</span>
         {/* The name from Odoo once loaded, as it may have changed. */}
-        <span aria-current="page">{tickets.data?.group.name ?? group.name}</span>
+        <span aria-current="page" title={getGroupTitle(tickets.data?.group ?? group)}>
+          {tickets.data?.group.name ?? group.name}
+        </span>
       </nav>
       <PickerList
         query={filter}

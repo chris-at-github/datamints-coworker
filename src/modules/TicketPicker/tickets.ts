@@ -23,6 +23,12 @@ export type TicketGroupRow = {
   pinned: boolean;
 };
 
+// Full text of a team or project for its tooltip, e.g. "Relaunch – Customer";
+// helpdesk teams have no customer.
+export function getGroupTitle({ name, customer }: Pick<TicketGroupRow, "name" | "customer">): string {
+  return customer ? `${name} – ${customer}` : name;
+}
+
 // Lists shown in the group choice before searching.
 export type TicketGroupLists = {
   pinned: TicketGroupRow[];
