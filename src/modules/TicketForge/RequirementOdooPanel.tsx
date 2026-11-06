@@ -10,6 +10,7 @@ import { Icon } from "@/components/Icon/Icon";
 import { Tabs } from "@/components/Tabs";
 import { ticketSource } from "@/modules/TicketPicker/api";
 import { GroupChoice } from "@/modules/TicketPicker/GroupPanel";
+import { TicketSummary } from "@/modules/TicketPicker/TicketSummary";
 import type { TicketGroupRow } from "@/modules/TicketPicker/tickets";
 import type { Ticket } from "@/modules/Timesheet/entries";
 import { TicketField } from "@/modules/Timesheet/TicketField";
@@ -140,15 +141,21 @@ export function RequirementOdooPanel({ requirement, isBusy, onChange, waitForSav
         Odoo
       </h3>
       {isTransferred && ticket ? (
-        <p className={styles["odoo-panel__target"]}>
-          {TICKET_LABELS[ticket.type]} {ticket.number} – {ticket.title}
+        // Looks like the ticket field before the transfer, but is fixed until unlinked.
+        <div className={styles["odoo-panel__target"]}>
+          <div className={styles["odoo-panel__ticket"]}>
+            <TicketSummary ticket={ticket} />
+          </div>
           {url && (
-            <a href={url} target="_blank" rel="noopener noreferrer" className={styles["odoo-panel__link"]}>
-              <Icon icon={ExternalLinkIcon} />
-              Open in Odoo
-            </a>
+            <Button.IconLink
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              icon={ExternalLinkIcon}
+              aria-label={`Open ${TICKET_LABELS[ticket.type]} #${ticket.number} in Odoo (new tab)`}
+            />
           )}
-        </p>
+        </div>
       ) : (
         <Tabs value={tab} onValueChange={(value) => setTab(value as TargetTab)} className={styles["odoo-panel__tabs"]}>
           <Tabs.List aria-label="Target in Odoo">

@@ -14,6 +14,8 @@ export type Ticket = {
   odooId: number;
   number: string;
   title: string;
+  // Name of the helpdesk team or the project; empty if unknown.
+  context: string;
 };
 
 // The editable values of one row.

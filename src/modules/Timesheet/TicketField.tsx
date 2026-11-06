@@ -6,6 +6,7 @@ import { Button } from "@/components/Button";
 import { Dialog } from "@/components/Dialog";
 import { mergeClassName } from "@/lib/class-names";
 import { findPickerFocus, TicketPicker } from "@/modules/TicketPicker/TicketPicker";
+import { TicketSummary } from "@/modules/TicketPicker/TicketSummary";
 import type { Ticket, TicketType } from "./entries";
 import { useTicketUrl } from "./TicketLinks";
 import styles from "./TicketField.module.css";
@@ -19,7 +20,7 @@ export type TicketFieldProps = {
   // Accessible name of the field, e.g. "Ticket, row 3".
   label: string;
   // "cell" is borderless for the table and shows the title as tooltip,
-  // "boxed" looks like a form field and shows the title next to the number.
+  // "boxed" looks like a form field and shows the ticket like the preview of "Enter number".
   variant: "cell" | "boxed";
 };
 
@@ -47,9 +48,11 @@ export function TicketField({ ticket, onSave, label, variant }: TicketFieldProps
           aria-label={`${label}: ${description}`}
           title={ticket && variant === "cell" ? description : undefined}
         >
-          <span className={styles["ticket-field__text"]}>
-            {variant === "boxed" && ticket ? `${number} – ${ticket.title}` : number}
-          </span>
+          {variant === "boxed" && ticket ? (
+            <TicketSummary ticket={ticket} />
+          ) : (
+            <span className={styles["ticket-field__text"]}>{number}</span>
+          )}
         </Dialog.Trigger>
         {/* The focus starts in the first input of the shown panel. */}
         <Dialog.Popup

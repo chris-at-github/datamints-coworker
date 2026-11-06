@@ -1,0 +1,33 @@
+/* Spans only, so the summary is valid inside a button. */
+.ticket-summary {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing-10);
+  min-width: 0;
+}
+
+/* Same columns as a row of the ticket lists (TicketRowContent.module.css). */
+.ticket-summary__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-30);
+  min-width: 0;
+}
+
+.ticket-summary__number {
+  flex: none;
+  color: var(--font-color-muted);
+}
+
+.ticket-summary__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticket-summary__context {
+  color: var(--font-color-muted);
+  font-size: var(--font-size-small);
+}

@@ -297,15 +297,13 @@ export async function openGroup(
   return { group: toGroupRow(group), rows };
 }
 
-const STORED_TICKET_SELECT = { ...TICKET_SELECT, group: { select: { name: true } } } as const;
-
-type StoredTicket = Prisma.TicketGetPayload<{ select: typeof STORED_TICKET_SELECT }>;
+type StoredTicket = Prisma.TicketGetPayload<{ select: typeof TICKET_SELECT }>;
 
 // A row of a stored ticket, which can be taken over without Odoo.
 function toStoredRow(stored: StoredTicket, info: string): TicketRow {
   const ticket = toTicket(stored);
 
-  return { type: ticket.type, odooId: ticket.odooId, number: ticket.number, title: ticket.title, context: stored.group?.name ?? "", info, ticket };
+  return { type: ticket.type, odooId: ticket.odooId, number: ticket.number, title: ticket.title, context: ticket.context, info, ticket };
 }
 
 // Favorites in the order they were added; no Odoo request.
@@ -313,7 +311,7 @@ export async function findFavorites(): Promise<TicketRow[]> {
   const tickets = await prisma.ticket.findMany({
     where: { favoritedAt: { not: null } },
     orderBy: { favoritedAt: "asc" },
-    select: STORED_TICKET_SELECT,
+    select: TICKET_SELECT,
   });
 
   return tickets.map((ticket) => toStoredRow(ticket, ""));
@@ -335,7 +333,7 @@ export async function findRecentlyBooked(): Promise<TicketRow[]> {
     where: { ticketId: { not: null } },
     orderBy: [{ page: { date: "desc" } }, { sorting: "desc" }],
     take: 200,
-    select: { duration: true, page: { select: { date: true } }, ticket: { select: STORED_TICKET_SELECT } },
+    select: { duration: true, page: { select: { date: true } }, ticket: { select: TICKET_SELECT } },
   });
   const rows = new Map<string, TicketRow>();
 

@@ -60,12 +60,15 @@
   }
 }
 
-/* As small as the trigger in the table instead of the square button size. */
+/* As small as the trigger in the table instead of the square button size.
+   One text line high with the icon centered in it, so the icon lines up with
+   the number; in a taller row it stays at the top next to the first line. */
 .ticket-field--cell .ticket-field__link {
-  align-items: flex-start;
+  align-self: flex-start;
   min-width: 0;
   min-height: 0;
-  padding: var(--spacing-30);
+  height: calc(1lh + 2 * var(--spacing-30));
+  padding: 0 var(--spacing-30);
   border-radius: 0;
   background: transparent;
 }

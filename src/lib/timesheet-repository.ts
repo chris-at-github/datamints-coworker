@@ -17,7 +17,15 @@ const LATEST_FIRST: Prisma.TimesheetPageOrderByWithRelationInput[] = [{ date: "d
 // Pagination, latest page and "New" only know pages that are not archived.
 const NOT_ARCHIVED = { archivedAt: null } as const;
 
-export const TICKET_SELECT = { id: true, type: true, odooId: true, number: true, title: true } as const;
+// With the name of the team or project, shown below the ticket.
+export const TICKET_SELECT = {
+  id: true,
+  type: true,
+  odooId: true,
+  number: true,
+  title: true,
+  group: { select: { name: true } },
+} as const;
 
 // An entry without pageId and with its ticket; toEntry shapes it for the API.
 const ENTRY_QUERY = {
@@ -29,8 +37,8 @@ type EntryRow = Prisma.TimesheetEntryGetPayload<typeof ENTRY_QUERY>;
 
 // Takes only the display fields, so rows with more fields can be passed in.
 // Only the application writes the type, so it is always a TicketType.
-export function toTicket({ id, type, odooId, number, title }: Prisma.TicketGetPayload<{ select: typeof TICKET_SELECT }>): Ticket {
-  return { id, type: type as TicketType, odooId, number, title };
+export function toTicket({ id, type, odooId, number, title, group }: Prisma.TicketGetPayload<{ select: typeof TICKET_SELECT }>): Ticket {
+  return { id, type: type as TicketType, odooId, number, title, context: group?.name ?? "" };
 }
 
 // The API uses "" for "no ticket", the database null (a reference must exist).

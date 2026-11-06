@@ -78,18 +78,20 @@
   cursor: pointer;
 }
 
+/* The linked ticket with its link icon, like the ticket field. */
 .odoo-panel__target {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--spacing-40);
-  margin: 0;
+  align-items: stretch;
+  gap: var(--spacing-30);
 }
 
-.odoo-panel__link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-20);
+.odoo-panel__ticket {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  padding: var(--spacing-30);
+  border-radius: var(--border-radius-small);
+  background: var(--color-neutral-10);
 }
 
 .odoo-panel__actions {
