@@ -1,0 +1,68 @@
+.requirement-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-40);
+}
+
+.requirement-list__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-50);
+
+  > h2 {
+    margin: 0;
+  }
+}
+
+.requirement-list__message {
+  min-height: 1lh;
+  margin: 0;
+  font-size: var(--font-size-small);
+}
+
+.requirement-list__empty {
+  margin: 0;
+  color: var(--font-color-muted);
+}
+
+/* Same grid look as the timesheet table. */
+.requirement-list__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-small);
+
+  th,
+  td {
+    padding: var(--spacing-20) var(--spacing-30);
+    border: 1px solid var(--color-ruler);
+    text-align: start;
+  }
+
+  th {
+    padding-block: var(--spacing-30);
+    background: var(--color-neutral-10);
+    color: var(--font-color-important);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* Status, date and actions shrink to their content, the title takes the rest. */
+  td:not(:first-child),
+  th:not(:first-child) {
+    width: 1%;
+    white-space: nowrap;
+  }
+}
+
+.requirement-list__untitled {
+  font-style: italic;
+}
+
+.requirement-list__date {
+  font-variant-numeric: tabular-nums;
+}
+
+.requirement-list__actions {
+  text-align: center;
+}

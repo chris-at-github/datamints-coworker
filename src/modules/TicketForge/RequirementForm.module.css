@@ -1,0 +1,63 @@
+/* Shared by the create form and the edit page. */
+.requirement-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-50);
+  max-width: 960px;
+}
+
+.requirement-form__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-50);
+
+  > h2 {
+    margin: 0;
+  }
+}
+
+/* Room for a few paragraphs before the field grows with its content. */
+.requirement-form__text {
+  min-height: 12lh;
+}
+
+.requirement-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-50);
+}
+
+.requirement-form__message {
+  min-height: 1lh;
+  margin: 0;
+  font-size: var(--font-size-small);
+}
+
+.requirement-form__meta {
+  margin: 0;
+  color: var(--font-color-muted);
+  font-size: var(--font-size-small);
+}
+
+.requirement-form__original {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-30);
+}
+
+/* The raw text as stored, line breaks kept, long lines wrapped. */
+.requirement-form__raw-text {
+  width: 100%;
+  margin: 0;
+  padding: var(--spacing-30);
+  border: 1px solid var(--color-ruler);
+  border-radius: var(--border-radius-small);
+  background: var(--color-neutral-10);
+  font: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

@@ -24,7 +24,7 @@ import { TicketField } from "./TicketField";
 import { getTransferStatusText, TransferStatusIcon } from "./TransferStatusIcon";
 import styles from "./TimesheetEntryDetail.module.css";
 import { TimesheetEntryPagination } from "./TimesheetEntryPagination";
-import { usePendingSaves } from "./usePendingSaves";
+import { usePendingSaves } from "@/lib/use-pending-saves";
 
 export type TimesheetEntryDetailProps = {
   pageId: string;

@@ -40,3 +40,10 @@ export type MenuLinkItemProps = BaseMenu.LinkItem.Props;
 export function MenuLinkItem({ className, ...props }: MenuLinkItemProps) {
   return <BaseMenu.LinkItem className={mergeStateClassName(styles.menu__item, className)} {...props} />;
 }
+
+export type MenuItemProps = BaseMenu.Item.Props;
+
+// An action as menu entry, e.g. "Archive"; closes the menu on click.
+export function MenuItem({ className, ...props }: MenuItemProps) {
+  return <BaseMenu.Item className={mergeStateClassName(styles.menu__item, className)} {...props} />;
+}

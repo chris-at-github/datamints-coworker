@@ -26,7 +26,7 @@ import { TimesheetMoreMenu } from "./TimesheetMoreMenu";
 import { TimesheetNewForDate } from "./TimesheetNewForDate";
 import { TimesheetPagination } from "./TimesheetPagination";
 import { TimesheetTable } from "./TimesheetTable";
-import { usePendingSaves } from "./usePendingSaves";
+import { usePendingSaves } from "@/lib/use-pending-saves";
 import { useReviewRun } from "./useReviewRun";
 import styles from "./TimesheetPage.module.css";
 
