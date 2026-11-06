@@ -36,21 +36,26 @@ ANTHROPIC_API_KEY="sk-ant-api…"
 
 ## Modell und Effort konfigurieren
 
-**Problem:** Modell und Gründlichkeit sollen ohne Codeänderung wechselbar sein.
+**Problem:** Modell und Gründlichkeit sollen ohne Codeänderung wechselbar sein,
+je Einsatzzweck getrennt.
 
 **Vorgehen:** In `.env` setzen (Vorlage in `.env.example`), dann den Dev-Server
 neu starten:
 
 ```bash
-ANTHROPIC_MODEL="claude-sonnet-5-5"   # z. B. claude-haiku-5-5 für schneller und billiger
-ANTHROPIC_EFFORT="low"                # low | medium | high | xhigh | max
+BOOKING_REVIEW_MODEL="claude-sonnet-5-5"   # Buchungstext-Prüfung; z. B. claude-haiku-5-5 für schneller und billiger
+BOOKING_REVIEW_EFFORT="low"                # low | medium | high | xhigh | max
+TICKET_FORGE_MODEL="claude-sonnet-5-5"     # Ticket Forge, siehe unten
+TICKET_FORGE_EFFORT="medium"
 ```
 
 **Hinweise:**
 
 - `effort` steuert, wie viel das Modell vor der Antwort nachdenkt. `low` ist
   schnell und günstig; werden Regeln im Template übersehen, `medium` probieren.
-- Fehlt `ANTHROPIC_MODEL` oder ist `ANTHROPIC_EFFORT` ungültig, antwortet die
+- Bis November 2026 hießen die Variablen der Buchungstext-Prüfung
+  `ANTHROPIC_MODEL` und `ANTHROPIC_EFFORT`; in einer älteren `.env` umbenennen.
+- Fehlt die Modell-Variable oder ist der Effort ungültig, antwortet die
   Route mit 502 und nennt den Grund.
 
 ## Buchungstext-Template anpassen

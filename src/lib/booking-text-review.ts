@@ -37,7 +37,7 @@ export async function reviewBookingText(entryId: string): Promise<TimesheetEntry
     return null;
   }
 
-  const config = readClaudeConfig("ANTHROPIC_MODEL", "ANTHROPIC_EFFORT", "low");
+  const config = readClaudeConfig("BOOKING_REVIEW_MODEL", "BOOKING_REVIEW_EFFORT", "low");
   const { entry, date } = result;
   // Whole minutes cannot be misread as a time of day; an empty duration counts as 0.
   const minutes = parseTime(entry.duration) ?? 0;
