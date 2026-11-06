@@ -2,7 +2,7 @@
 
 ## Context & Goal
 
-Work package 3 of Ticket Forge (see `docs/plans/ticket-forge.md`). Claude
+Work package 3 of Ticket Forge (see `docs/plans/archive/ticket-forge.md`). Claude
 prepares a requirement from its raw text into title, description and internal
 description following the rules of a prompt file, and refines it with an extra
 instruction. Claude also gives the user feedback on what is missing or unclear.

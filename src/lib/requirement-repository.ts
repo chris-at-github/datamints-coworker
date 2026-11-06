@@ -4,6 +4,7 @@ import { TICKET_SELECT, toTicket } from "@/lib/timesheet-repository";
 import type {
   Requirement,
   RequirementChanges,
+  RequirementSource,
   RequirementStatus,
   TransferredValues,
 } from "@/modules/TicketForge/requirements";
@@ -24,6 +25,7 @@ type RequirementRow = Prisma.RequirementGetPayload<typeof REQUIREMENT_QUERY>;
 // Only the application writes status and types, so the casts hold.
 function toRequirement({
   status,
+  source,
   previousValues,
   targetGroup,
   ticket,
@@ -36,6 +38,7 @@ function toRequirement({
   return {
     ...values,
     status: status as RequirementStatus,
+    source: source as RequirementSource,
     canUndo: previousValues !== "",
     targetGroup: targetGroup && { ...targetGroup, type: targetGroup.type as TicketType },
     ticket: ticket && toTicket(ticket),
@@ -46,10 +49,24 @@ function toRequirement({
   };
 }
 
-// The description starts as the raw text, so it can be worked on right away.
-export async function createRequirement(rawText: string, title: string): Promise<Requirement> {
+export type NewRequirement = {
+  rawText: string;
+  title?: string;
+  // Without a description it starts as the raw text, so it can be worked on right away.
+  description?: string;
+  internalDescription?: string;
+  source?: RequirementSource;
+};
+
+export async function createRequirement({
+  rawText,
+  title = "",
+  description,
+  internalDescription = "",
+  source = "manual",
+}: NewRequirement): Promise<Requirement> {
   const row = await prisma.requirement.create({
-    data: { id: crypto.randomUUID(), title, rawText, description: rawText },
+    data: { id: crypto.randomUUID(), title, rawText, description: description ?? rawText, internalDescription, source },
     ...REQUIREMENT_QUERY,
   });
 

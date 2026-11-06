@@ -3,6 +3,14 @@ import type { Ticket, TicketType } from "@/modules/Timesheet/entries";
 
 export type RequirementStatus = "draft" | "prepared" | "transferred";
 
+// Where a requirement was created: in the app or by Claude Code through MCP.
+export type RequirementSource = "manual" | "claude-code";
+
+export const SOURCE_LABELS: Record<RequirementSource, string> = {
+  manual: "Manual",
+  "claude-code": "Claude Code",
+};
+
 // A helpdesk team or project in which a new ticket is created.
 export type RequirementTargetGroup = { id: string; type: TicketType; odooId: number; name: string };
 
@@ -21,6 +29,7 @@ export type Requirement = {
   description: string;
   internalDescription: string;
   status: RequirementStatus;
+  source: RequirementSource;
   // Claude's notes for the author; not part of the ticket.
   aiFeedback: string;
   // True while the version before the last AI run can be restored.

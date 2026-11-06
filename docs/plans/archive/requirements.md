@@ -2,7 +2,7 @@
 
 ## Context & Goal
 
-Work package 2 of Ticket Forge (see `docs/plans/ticket-forge.md`). A
+Work package 2 of Ticket Forge (see `docs/plans/archive/ticket-forge.md`). A
 requirement is created from a raw text (meeting notes, email), listed, edited
 as Markdown and archived manually. AI preparation (package 3), Odoo transfer
 (package 4) and MCP (package 5) build on it.

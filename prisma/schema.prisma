@@ -99,6 +99,8 @@ model Requirement {
   // Markdown, converted to Odoo HTML on transfer.
   description         String       @default("")
   internalDescription String       @default("")
+  // "manual" (created in the app) or "claude-code" (created through MCP).
+  source              String       @default("manual")
   // "draft", "prepared" or "transferred".
   status              String       @default("draft")
   // Claude's notes for the author: missing information, contradictions,

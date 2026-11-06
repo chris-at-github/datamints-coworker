@@ -16,6 +16,7 @@ bewusst kurz gehalten und zum Nachschlagen gedacht, nicht zum Durchlesen.
 | Linting | [lint.md](lint.md) | ESLint und Stylelint ausführen, Befunde beheben, `.editorconfig`, PhpStorm-Einrichtung |
 | Claude API | [claude-api.md](claude-api.md) | API-Key erstellen, Konfiguration in `.env`, Template und Platzhalter, Prüfung per `curl`, Ticket Forge aufbereiten |
 | Odoo | [odoo.md](odoo.md) | API-Key einrichten und erneuern, Verbindung prüfen, Sprache der Abfragen, Daten des Ticket-Pickers, gelöschte Zeitbuchung, URL-Vorlagen für Ticket-Links, Ticket Forge übertragen |
+| Claude Code (MCP) | [claude-code-mcp.md](claude-code-mcp.md) | Ticket Forge in Claude Code einrichten, Token, Tools |
 
 ## Aufbau
 

@@ -15,5 +15,5 @@ export async function POST(request: Request) {
     return Response.json({ error: "title must be a string" }, { status: 400 });
   }
 
-  return Response.json({ requirement: await createRequirement(rawText, title.trim()) }, { status: 201 });
+  return Response.json({ requirement: await createRequirement({ rawText, title: title.trim() }) }, { status: 201 });
 }

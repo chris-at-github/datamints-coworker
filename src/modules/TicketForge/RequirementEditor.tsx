@@ -10,7 +10,7 @@ import { usePendingSaves } from "@/lib/use-pending-saves";
 import { prepareRequirement, undoPreparation, updateRequirement } from "./api";
 import { RequirementAiPanel } from "./RequirementAiPanel";
 import { RequirementOdooPanel } from "./RequirementOdooPanel";
-import { formatDateTime, getDisplayTitle, type Requirement, STATUS_LABELS, UNTITLED } from "./requirements";
+import { formatDateTime, getDisplayTitle, type Requirement, SOURCE_LABELS, STATUS_LABELS, UNTITLED } from "./requirements";
 import styles from "./RequirementForm.module.css";
 
 type TextField = "title" | "description" | "internalDescription";
@@ -160,7 +160,8 @@ export function RequirementEditor({ requirement: initialRequirement, autoPrepare
       </header>
       <p className={styles["requirement-form__meta"]}>
         {STATUS_LABELS[requirement.status]}
-        {requirement.archived && " · Archived"} · Last change {formatDateTime(requirement.updatedAt)}
+        {requirement.archived && " · Archived"} · {SOURCE_LABELS[requirement.source]} · Last change{" "}
+        {formatDateTime(requirement.updatedAt)}
       </p>
       <p className={styles["requirement-form__message"]} aria-live="polite">
         {message}

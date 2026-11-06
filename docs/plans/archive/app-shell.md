@@ -2,7 +2,7 @@
 
 ## Context & Goal
 
-The Co-Worker gets a second area, Ticket Forge (see `docs/plans/ticket-forge.md`).
+The Co-Worker gets a second area, Ticket Forge (see `docs/plans/archive/ticket-forge.md`).
 To switch between the areas every page gets a fixed sidebar on the left with
 "Timesheet" and "Ticket Forge". The start page `/` links to both areas with
 two boxes. `/ticket-forge` gets a logo header like the timesheet with its own

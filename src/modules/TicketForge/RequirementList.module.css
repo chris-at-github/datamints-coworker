@@ -55,6 +55,17 @@
   }
 }
 
+/* Small label after the title; manual requirements, the usual case, have none. */
+.requirement-list__source {
+  margin-left: var(--spacing-30);
+  padding: 0 var(--spacing-20);
+  border-radius: var(--border-radius-small);
+  background: var(--color-neutral-10);
+  color: var(--font-color-muted);
+  font-size: var(--font-size-small);
+  white-space: nowrap;
+}
+
 .requirement-list__untitled {
   font-style: italic;
 }

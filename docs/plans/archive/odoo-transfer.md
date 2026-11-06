@@ -2,7 +2,7 @@
 
 ## Context & Goal
 
-Work package 4 of Ticket Forge (see `docs/plans/ticket-forge.md`). A
+Work package 4 of Ticket Forge (see `docs/plans/archive/ticket-forge.md`). A
 requirement is transferred to Odoo: as a new helpdesk ticket in a team, as a
 new task in a project, or into an existing ticket or task. Markdown becomes
 Odoo HTML with editable checklists, the original text is appended, and changes

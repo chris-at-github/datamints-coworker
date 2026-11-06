@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/Button";
 import { updateRequirement } from "./api";
-import { formatDateTime, getDisplayTitle, type Requirement, STATUS_LABELS } from "./requirements";
+import { formatDateTime, getDisplayTitle, type Requirement, SOURCE_LABELS, STATUS_LABELS } from "./requirements";
 import styles from "./RequirementList.module.css";
 
 export type RequirementListProps = {
@@ -69,6 +69,9 @@ export function RequirementList({ requirements: initialRequirements }: Requireme
                   >
                     {getDisplayTitle(requirement)}
                   </Link>
+                  {requirement.source === "claude-code" && (
+                    <span className={styles["requirement-list__source"]}>{SOURCE_LABELS[requirement.source]}</span>
+                  )}
                 </td>
                 <td>{STATUS_LABELS[requirement.status]}</td>
                 <td className={styles["requirement-list__date"]}>{formatDateTime(requirement.updatedAt)}</td>
