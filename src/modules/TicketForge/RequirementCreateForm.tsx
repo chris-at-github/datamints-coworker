@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { Button } from "@/components/Button";
+import { Checkbox } from "@/components/Checkbox/Checkbox";
 import { Field } from "@/components/Field";
 import { createRequirement } from "./api";
 import styles from "./RequirementForm.module.css";
 
-// Raw text and an optional title; saving opens the new requirement.
+// Raw text and an optional title; saving opens the new requirement, which
+// starts the AI preparation right away if the checkbox is checked.
 export function RequirementCreateForm() {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
@@ -24,7 +26,9 @@ export function RequirementCreateForm() {
     try {
       const requirement = await createRequirement(String(data.get("rawText")), String(data.get("title")));
 
-      router.push(`/ticket-forge/${requirement.id}`);
+      const prepare = data.get("prepare") === "on" ? "?prepare=1" : "";
+
+      router.push(`/ticket-forge/${requirement.id}${prepare}`);
     } catch (error) {
       console.error(error);
       setMessage("The requirement could not be created.");
@@ -52,6 +56,10 @@ export function RequirementCreateForm() {
           className={styles["requirement-form__text"]}
         />
       </Field>
+      <label className={styles["requirement-form__check"]}>
+        <Checkbox name="prepare" defaultChecked />
+        Prepare with AI
+      </label>
       <div className={styles["requirement-form__actions"]}>
         <Button type="submit" disabled={isSaving}>
           Create

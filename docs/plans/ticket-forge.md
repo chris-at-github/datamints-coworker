@@ -49,9 +49,26 @@ Given per work package in its own plan.
 - **Internal description:** filled by the AI and by the user.
 - **Ticket layout (prompt):** title, goal (1–3 sentences, why), requirements
   as checklist (each item checkable, replaces separate acceptance criteria),
-  open questions (only if the raw text leaves gaps). Internal description:
-  budget/effort hints, customer mood, contact persons, technical ideas from the
-  notes. No invention, no technical design, size follows the raw text, German.
+  optional "to check" (checkable tasks such as evaluating extensions or reuse
+  ideas, or estimating the effort), optional "hints" (links, contact persons,
+  deliverables), open questions (only if the raw text leaves gaps); optional
+  sections only when they make sense. No invention, no technical design, size
+  follows the raw text, nothing from the raw text dropped, each fact once,
+  German.
+- **Visibility:** the description is the default for all content, including
+  ideas of our team; the customer may see it. The internal description only
+  gets what the author marks as internal ("intern:" in the raw text or an
+  instruction) and, as a safety net, judgements about the customer, internal
+  calculation and very technical implementation details. Claude does not move
+  or remove items of the current state unless an instruction asks for it; it
+  names misplaced items in its feedback instead.
+- **No Definition of Done section:** the requirement checklist is the
+  acceptance criterion; a general DoD belongs to the team process.
+- **Original in the ticket:** the transfer appends the raw text to the
+  description under "## Anforderung durch Kunden" (package 4). The description
+  is visible in the customer portal, so internal remarks in meeting notes must
+  be removed from the raw text's copy before the transfer — to be designed in
+  package 4.
 - **Markdown is the source:** a deterministic converter writes Odoo HTML; the
   AI never writes HTML. Checklists become `<ul class="o_checklist"><li>…</li></ul>`,
   nesting allowed (verified on an existing task in Odoo); checked items get
@@ -74,8 +91,11 @@ Given per work package in its own plan.
     first time with content) → ask per field: replace, append or skip.
   Rejected: `write_date`, which changes on any field (stage, assignee) and
   would ask far too often.
+- **AI feedback and undo:** Claude also returns feedback for the author
+  (missing information, contradictions, assumptions), shown in the app and not
+  transferred; one-step undo of the last AI change (package 3).
 - **AI model:** own settings `TICKET_FORGE_MODEL` / `TICKET_FORGE_EFFORT`,
-  starting with `claude-sonnet-5-5` and `medium`; preparing a requirement is
+  starting with `claude-sonnet-5-5` and `medium`, no refusal fallback; preparing a requirement is
   harder than polishing a booking text and runs rarely.
 - **Claude Code:** MCP over HTTP (Streamable HTTP in a Next.js route), secured
   with a bearer token from `.env`. Claude Code may create, read, update and

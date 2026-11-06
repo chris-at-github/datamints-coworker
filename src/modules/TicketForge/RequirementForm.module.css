@@ -23,6 +23,14 @@
   min-height: 12lh;
 }
 
+.requirement-form__check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-30);
+  align-self: flex-start;
+  cursor: pointer;
+}
+
 .requirement-form__actions {
   display: flex;
   flex-wrap: wrap;

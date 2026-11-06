@@ -97,8 +97,14 @@ model Requirement {
   // Markdown, converted to Odoo HTML on transfer.
   description         String    @default("")
   internalDescription String    @default("")
-  // "draft" for now; later "prepared" and "transferred".
+  // "draft" or "prepared"; later "transferred".
   status              String    @default("draft")
+  // Claude's notes for the author: missing information, contradictions,
+  // assumptions; replaced by every AI run and not transferred.
+  aiFeedback          String    @default("")
+  // Title, descriptions and status before the last AI run as JSON, for a
+  // one-step undo; empty if there is nothing to undo.
+  previousValues      String    @default("")
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
   // Null while the requirement is not archived; archived ones leave the list.

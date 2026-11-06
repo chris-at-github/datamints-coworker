@@ -1,0 +1,57 @@
+/* A framed box, so the AI actions stand apart from the fields they change. */
+.ai-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-40);
+  padding: var(--spacing-50);
+  border: 1px solid var(--color-ruler);
+  border-radius: var(--border-radius-default);
+}
+
+.ai-panel__title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-30);
+  margin: 0;
+  color: var(--font-color-important);
+  font-size: var(--font-size-default);
+  font-weight: var(--font-weight-medium);
+}
+
+.ai-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-30);
+
+  /* Icon and text inside a button. */
+  button {
+    gap: var(--spacing-30);
+  }
+}
+
+.ai-panel__status {
+  min-height: 1lh;
+  margin: 0;
+  color: var(--font-color-muted);
+  font-size: var(--font-size-small);
+}
+
+.ai-panel__feedback {
+  padding: var(--spacing-40);
+  border-radius: var(--border-radius-small);
+  background: var(--color-neutral-10);
+  font-size: var(--font-size-small);
+}
+
+.ai-panel__feedback-title {
+  margin: 0 0 var(--spacing-20);
+  color: var(--font-color-important);
+  font-size: inherit;
+  font-weight: var(--font-weight-medium);
+}
+
+/* Claude answers with line breaks and list markers as plain text. */
+.ai-panel__feedback-text {
+  margin: 0;
+  white-space: pre-wrap;
+}

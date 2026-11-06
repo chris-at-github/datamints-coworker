@@ -89,3 +89,47 @@ curl -k -X POST https://datamints-coworker.ddev.site:3000/api/timesheet-entries/
   lokal betreiben.
 - Serverseitig lässt sich `reviewBookingText(entryId)` aus
   `src/lib/booking-text-review.ts` direkt aufrufen.
+
+## Ticket Forge: Anforderungen aufbereiten
+
+**Problem:** Ticket Forge bereitet Anforderungen mit Claude auf. Regeln, Modell
+oder Effort sollen sich ändern, oder der Aufruf soll ohne Oberfläche laufen.
+
+**Vorgehen:**
+
+- Regeln anpassen: `prompts/ticket-forge.md` bearbeiten. Die Datei wird bei
+  jedem Aufruf neu gelesen, ein Neustart ist nicht nötig.
+- Modell und Effort in `.env` setzen, dann den Dev-Server neu starten:
+
+```bash
+TICKET_FORGE_MODEL="claude-sonnet-5-5"   # bei schwachen Ergebnissen claude-opus-5-5 testen
+TICKET_FORGE_EFFORT="medium"             # low | medium | high | xhigh | max
+```
+
+- Aufbereiten, Nachschärfen und Rückgängig ohne Oberfläche:
+
+```bash
+B=https://datamints-coworker.ddev.site:3000/api/requirements/<id>
+curl -k -X POST -d '{}' $B/prepare                                      # aufbereiten
+curl -k -X POST -d '{"instruction":"Punkt 3 ist out of scope"}' $B/prepare  # nachschärfen
+curl -k -X POST $B/undo                                                 # letzte KI-Änderung zurücknehmen
+```
+
+**Hinweise:**
+
+- Platzhalter im Template: `{{rawText}}`, `{{title}}`, `{{description}}`,
+  `{{internalDescription}}`, `{{instruction}}`. Leere Felder kommen als
+  „(leer)“ an. Eine unveränderte Beschreibung (noch gleich dem Rohtext) gilt als
+  leer, damit Claude sie neu aufbaut, statt den Rohtext zu überarbeiten.
+- Die Antwort ist per Structured Outputs auf `title`, `description`,
+  `internalDescription` und `feedback` festgelegt. `feedback` ist die
+  Rückmeldung an den Verfasser und wird nicht nach Odoo übertragen.
+- Ein selbst gesetzter Titel bleibt erhalten, außer eine Zusatzanweisung ist
+  angegeben.
+- Rückgängig gibt es für genau einen Schritt: die Fassung vor dem letzten
+  KI-Aufruf. Danach von Hand gemachte Änderungen gehen dabei verloren.
+- Ein Aufruf dauert mit `claude-sonnet-5-5` und `medium` etwa 10 Sekunden.
+- Fehler (fehlende Variable, API-Fehler, Ablehnung) beantwortet die Route mit
+  502 und der Meldung, die Oberfläche zeigt sie an.
+- Wie bei der Buchungstext-Prüfung haben die Routen keine Authentifizierung;
+  jeder Aufruf kostet Geld, daher nur lokal betreiben.

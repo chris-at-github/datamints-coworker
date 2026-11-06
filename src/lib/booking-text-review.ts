@@ -1,8 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import Anthropic from "@anthropic-ai/sdk";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
+import { askClaude, fillTemplate, readClaudeConfig } from "@/lib/claude";
 import { parseTime } from "@/lib/time";
 import { findEntryWithDate, saveReviewedBookingText } from "@/lib/timesheet-repository";
 import { getBookingTextField, getReviewValues, type TimesheetEntry } from "@/modules/Timesheet/entries";
@@ -17,17 +16,8 @@ const GUIDANCE_DIRECTORY = path.join(process.cwd(), "prompts", "booking-text-rev
 const SMALL_MAX_MINUTES = 30;
 const MEDIUM_MAX_MINUTES = 120;
 
-const EFFORTS = ["low", "medium", "high", "xhigh", "max"] as const;
-
-type Effort = (typeof EFFORTS)[number];
-
 // The answer is constrained to this schema by structured outputs.
 const ReviewAnswer = z.object({ optimizedText: z.string() });
-
-// Replaces {{name}} with the value; unknown placeholders are removed.
-function fillTemplate(template: string, values: Record<string, string>): string {
-  return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, name: string) => (Object.hasOwn(values, name) ? values[name] : ""));
-}
 
 function getBookingSize(minutes: number): "small" | "medium" | "large" {
   if (minutes <= SMALL_MAX_MINUTES) {
@@ -35,21 +25,6 @@ function getBookingSize(minutes: number): "small" | "medium" | "large" {
   }
 
   return minutes <= MEDIUM_MAX_MINUTES ? "medium" : "large";
-}
-
-function readConfig() {
-  const model = process.env.ANTHROPIC_MODEL;
-  const effort = process.env.ANTHROPIC_EFFORT ?? "low";
-
-  if (!model) {
-    throw new Error("ANTHROPIC_MODEL is not set");
-  }
-
-  if (!EFFORTS.includes(effort as Effort)) {
-    throw new Error(`ANTHROPIC_EFFORT must be one of ${EFFORTS.join(", ")}`);
-  }
-
-  return { model, effort: effort as Effort };
 }
 
 // Rewrites the booking text of an entry by the rules in the template and stores
@@ -62,7 +37,7 @@ export async function reviewBookingText(entryId: string): Promise<TimesheetEntry
     return null;
   }
 
-  const { model, effort } = readConfig();
+  const config = readClaudeConfig("ANTHROPIC_MODEL", "ANTHROPIC_EFFORT", "low");
   const { entry, date } = result;
   // Whole minutes cannot be misread as a time of day; an empty duration counts as 0.
   const minutes = parseTime(entry.duration) ?? 0;
@@ -84,22 +59,7 @@ export async function reviewBookingText(entryId: string): Promise<TimesheetEntry
   // The block is filled first, so its placeholders are resolved before it is inserted.
   const prompt = fillTemplate(template, { ...values, durationGuidance: fillTemplate(guidance, values) });
 
-  const response = await new Anthropic().messages.parse({
-    model,
-    max_tokens: 16000,
-    output_config: { effort, format: zodOutputFormat(ReviewAnswer) },
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  if (response.stop_reason === "refusal") {
-    throw new Error(`Review refused: ${response.stop_details?.explanation ?? "no explanation"}`);
-  }
-
-  if (!response.parsed_output) {
-    throw new Error(`Review returned no answer (stop reason: ${response.stop_reason})`);
-  }
-
-  const reviewedText = response.parsed_output.optimizedText;
+  const { optimizedText: reviewedText } = await askClaude(prompt, ReviewAnswer, config);
 
   return saveReviewedBookingText(
     entry.id,
