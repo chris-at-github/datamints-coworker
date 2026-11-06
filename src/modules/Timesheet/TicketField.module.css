@@ -39,9 +39,14 @@
   height: 100%;
 }
 
-/* Borderless in the table, the cell borders draw the grid. */
+/* Borderless in the table, the cell borders draw the grid; the ring covers the
+   cell border like the other fields of the table. */
 .ticket-field--cell .ticket-field__trigger {
   border-radius: 0;
+
+  &:focus-visible {
+    outline-offset: -1px;
+  }
 }
 
 /* Looks like the other form fields of the detail page. */
