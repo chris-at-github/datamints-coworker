@@ -42,12 +42,14 @@ Sinn ergeben:
 ## Ziel
 1–3 Sätze: was der Kunde erreichen will und warum.
 
-## Anforderungen
-- [ ] Eine prüfbare Anforderung pro Punkt
-    - [ ] Unterpunkte nur, wenn eine Anforderung aus mehreren Teilen besteht
-
 ## Zu prüfen
 - [ ] Aufgaben vor oder während der Umsetzung, die keine Anforderung des Kunden sind
+
+## Anforderungen
+_Nicht abschließend: Bitte bei der Umsetzung prüfen und um fehlende Anforderungen ergänzen._
+
+- [ ] Eine Anforderung pro Punkt, formuliert mit „soll“
+    - [ ] Unterpunkte nur, wenn eine Anforderung aus mehreren Teilen besteht
 
 ## Hinweise
 - Lösungsvorschläge, Beispiele, Links, Ansprechpartner, Zulieferungen
@@ -56,8 +58,15 @@ Sinn ergeben:
 - Fragen an den Kunden, ohne deren Antwort die Umsetzung nicht möglich ist
 ```
 
+- Die Anforderungen richten sich an den Entwickler, der sie umsetzt. Sie
+  beschreiben, was gebaut werden soll, nicht einen erreichten Zustand: „Die
+  Newsletter-Anmeldung soll auf allen Seiten im Footer erscheinen“, nicht „Die
+  Newsletter-Anmeldung erscheint auf allen Seiten“.
 - Jeder Punkt unter „Anforderungen“ ist für sich abhakbar: Nach der Umsetzung
   lässt sich mit Ja oder Nein sagen, ob er erfüllt ist.
+- Übernimm den kursiven Hinweis „Nicht abschließend: …“ wörtlich direkt unter
+  die Überschrift „Anforderungen“: Die Liste gibt nur wieder, was der Kunde
+  genannt hat; der Entwickler prüft sie und ergänzt fehlende Anforderungen.
 - Termine sind keine Anforderungen: Ein Wunschtermin des Kunden gehört als
   Satz ins Ziel.
 - „Zu prüfen“ nur, wenn sich eine Prüfaufgabe ergibt, z. B.:
